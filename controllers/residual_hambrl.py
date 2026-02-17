@@ -141,6 +141,12 @@ class ResidualHAMBRLController:
         fallback_action: float,
         cv_voltage_v: float,
     ) -> Tuple[float, bool]:
+        """Select a safe action using a discrete linear search (Safety Shield).
+
+        Note: This implementation uses a discrete search over a linspace of candidates,
+        checking the `env` (or a model copy) for safety violations. It is NOT
+        differentiable in the PyTorch sense, but acts as a safety filter during rollout.
+        """
         if self._is_safe_action(env, proposed_action, cv_voltage_v):
             return proposed_action, False
 

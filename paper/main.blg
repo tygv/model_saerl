@@ -1,0 +1,75 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 9 items.
+The style file: unsrtnat.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--I didn't find a database entry for "hu2020advanced"
+Warning--I didn't find a database entry for "tomaszewska2019lithium"
+Warning--I didn't find a database entry for "liu2018charging"
+Warning--I didn't find a database entry for "zou2016multi"
+Warning--I didn't find a database entry for "liu2019brief"
+Warning--I didn't find a database entry for "waldmann2014optimization"
+Warning--I didn't find a database entry for "duru2021"
+Warning--I didn't find a database entry for "gonzalez2024determining"
+Warning--I didn't find a database entry for "beh2019pulse"
+Warning--I didn't find a database entry for "yan2020mpc"
+Warning--I didn't find a database entry for "Zou"
+Warning--I didn't find a database entry for "Yan"
+Warning--I didn't find a database entry for "Wang2022"
+Warning--I didn't find a database entry for "Hirt2024"
+Warning--I didn't find a database entry for "Lu2024"
+Warning--I didn't find a database entry for "wu2020battery"
+Warning--I didn't find a database entry for "wei2021safe"
+Warning--I didn't find a database entry for "lakshminarayanan2017simple"
+Warning--I didn't find a database entry for "chua2018deep"
+Warning--I didn't find a database entry for "liu2019gaussian"
+Warning--I didn't find a database entry for "koenker2001quantile"
+Warning--I didn't find a database entry for "tang2021model"
+Warning--I didn't find a database entry for "schulman2017proximal"
+Warning--I didn't find a database entry for "saha2008battery"
+Warning--I didn't find a database entry for "xing2014battery"
+Warning--I didn't find a database entry for "severson2019data"
+You've used 0 entries,
+            2481 wiz_defined-function locations,
+            582 strings with 4805 characters,
+and the built_in function-call counts, 34 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 2
+:= -- 11
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 1
+format.name$ -- 0
+if$ -- 1
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 0
+newline$ -- 8
+num.names$ -- 0
+pop$ -- 0
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 1
+stack$ -- 0
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 0
+width$ -- 0
+write$ -- 7
+(There were 26 warnings)

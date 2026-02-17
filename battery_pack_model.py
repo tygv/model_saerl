@@ -58,7 +58,24 @@ class PackConfiguration:
 
 
 class BatteryPack:
-    """Complete battery pack model with multiple cells in series/parallel."""
+    """Complete battery pack model with multiple cells in series/parallel.
+
+    The pack model aggregates individual cell models and adds:
+    1. Series/Parallel Logic:
+       V_pack = sum(V_series_strings)
+       I_cell = I_pack / n_parallel
+
+    2. Thermal Interconnection:
+       T_new = ThermalMatrix @ T_old
+       where ThermalMatrix models heat transfer between adjacent cells (conduction/convection).
+
+    3. Balancing Logic:
+       Passive balancing drains cells with SoC > mean(SoC) + threshold.
+       Active balancing transfers charge from high-SoC to low-SoC cells (lossless assumption).
+
+    4. Safety Logic:
+       Checks limits for V_cell_max, V_cell_min, T_cell_max, and I_pack_max.
+    """
 
     def __init__(
         self,

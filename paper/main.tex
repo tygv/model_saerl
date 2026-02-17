@@ -36,7 +36,7 @@
 \title{Safe Adaptive Ensemble Reinforcement Learning (SAERL) for Physics-Consistent Fast Charging of Lithium-Ion Battery Packs}
 
 \author{
-Robin K. E. Tau$^{1,*}$, Nonofo M. J. Ditshego$^1$, Abid Yahya$^1$, Mmoloki Mangwala$^1$ \\
+Robin K. E. Tau$^{1,*}$,  Abid Yahya$^1$, Mmoloki Mangwala$^1$ ,Nonofo M. J. Ditshego$^1$,\\
 \small $^1$Department of Electrical and Communications Systems, Botswana International\\
 \small University of Science and Technology, Palapye, Botswana \\
 \small *Correspondence: tr1800236@studentmail.biust.ac.bw
@@ -52,6 +52,7 @@ Fast charging of lithium-ion battery packs remains a critical challenge for elec
 
 \noindent\textbf{Keywords:} reinforcement learning, fast charging, lithium-ion batteries, uncertainty quantification, ensemble learning, battery management systems
 
+\newpage
 \section{Introduction}
 \label{sec:introduction}
 
@@ -59,14 +60,7 @@ The global transition to electric mobility hinges on battery systems that can be
 
 Industrial practice overwhelmingly relies on the constant-current constant-voltage (CCCV) protocol, which is simple and robust but inherently conservative, leaving significant time on the table \cite{liu2018charging}. Model predictive control (MPC) can explicitly handle constraints and optimize a finite horizon, yet its performance degrades when model mismatch or cell-to-cell variations are present, and its computational cost scales unfavorably with pack size \cite{zou2016multi}. Reinforcement learning (RL) offers an appealing alternative: a policy can learn to exploit nonlinear dynamics and adapt online. However, pure model-free RL methods often violate constraints during exploration and require prohibitively many interactions with the physical system \cite{liu2019brief}.
 
-To overcome these limitations, we propose **SAERL (Safe Adaptive Ensemble Reinforcement Learning)**---a hybrid framework that tightly integrates three complementary predictors (a quantile GRU, a quantile MLP, and a random forest with tree-variance uncertainty) with an adaptive gating network, a residual policy trained via offline-to-online RL, and a differentiable safety shield. SAERL operates directly on a battery pack containing cells with inherent parameter variance, using only commonly available measurements (voltage, current, surface temperature). The core innovations are:
-
-\begin{enumerate}[leftmargin=*]
-    \item **Uncertainty-aware ensemble**: Predictors are trained to output both point estimates and quantiles; their predictions are fused online by a neural gate that adapts based on each model's recent error and epistemic uncertainty.
-    \item **Residual RL over a safe baseline**: The policy learns corrections to an MPC baseline, accelerating learning while preserving a fallback safety layer that intervenes whenever constraints are threatened.
-    \item **Realistic evaluation protocol**: We simulate continuous state estimation with additive sensor noise and explicitly model cell-to-cell capacity and resistance spreads, moving beyond single-cell, noise-free evaluations.
-    \item **Comprehensive validation**: Using 15 scenarios from three public datasets, SAERL achieves a 40\% acceptance rate (6/15 scenarios) under stringent pass criteria---a substantial improvement over 0\% for both CCCV and MPC. SAERL matches MPC's zero-safety-event capability in 12/15 runs while being 8.6\% faster to 80\% SoC, and reduces safety violations by 97.3\% compared to CCCV.
-\end{enumerate}
+To overcome these limitations, we propose \textbf{SAERL (Safe Adaptive Ensemble Reinforcement Learning)} a hybrid framework that tightly integrates three complementary predictors (a quantile GRU, a quantile MLP, and a random forest with tree-variance uncertainty) with an adaptive gating network, a residual policy trained via offline-to-online RL, and a differentiable safety shield. SAERL operates directly on a battery pack containing cells with inherent parameter variance, using only commonly available measurements (voltage, current, surface temperature).
 
 The remainder of this paper is organized as follows. Section~\ref{sec:related-work} reviews related work on charging optimization and RL for battery control. Section~\ref{sec:problem} formulates fast charging as a constrained Markov decision process. Section~\ref{sec:method} details the SAERL architecture, including the ensemble, adaptive gate, residual policy, and safety shield. Section~\ref{sec:experiments} describes the battery and pack models, datasets, training pipeline, and evaluation protocol. Section~\ref{sec:results} presents main results, robustness analysis, and ablation studies. Section~\ref{sec:discussion} interprets the findings, and Section~\ref{sec:limitations} discusses limitations and future directions. We conclude in Section~\ref{sec:conclusion}. All code, data, and trained models are publicly available to foster reproducible research.
 
@@ -74,9 +68,52 @@ The remainder of this paper is organized as follows. Section~\ref{sec:related-wo
 \label{sec:related-work}
 
 \subsection{Charging Strategies}
-Charging protocols for lithium-ion batteries range from simple heuristics to optimization-based methods. CCCV remains the industry standard due to its reliability and lack of parameterization \cite{waldmann2014optimization}. Multi-stage constant current (MSCC) methods predefine a current profile that reduces stepwise, but they require extensive offline calibration and cannot adapt to cell aging or environmental changes \cite{liu2018charging}. Pulse charging applies alternating current pulses in an attempt to improve ion diffusion, yet its benefits are inconsistent across chemistries \cite{beh2019pulse}.
 
+
+The Constant Current Constant Voltage (CCCV) protocol is the de facto standard charging strategy for lithium-ion batteries, prized for its simplicity, reliability, and straightforward implementation \cite{waldmann2014optimization}. 
+
+CCCV charging proceeds in two distinct phases. In the first, \textit{constant current} (CC) phase, a fixed current—typically specified as a C-rate—is applied until the battery terminal voltage reaches a predefined upper cutoff limit. The current is then held constant while the charger switches to the \textit{constant voltage} (CV) phase. During this phase, the current decays exponentially as the cell approaches full charge, and the process terminates when the current falls below a set threshold (e.g., C/20) \cite{liu2018charging}.
+
+This dual-mode structure intrinsically protects the cell: the CC phase limits current-related stress, while the CV phase prevents overvoltage. Because the protocol requires no knowledge of internal battery states such as state of charge (SoC) or state of health (SoH), it is easily implemented in low-cost chargers and remains highly robust across different cell formats and chemistries.
+
+The dominance of CCCV stems from several practical advantages. It is completely open-loop and does not rely on a battery model, eliminating the need for parameter identification or online estimation. Its control law is trivial—saturate voltage, then regulate voltage—making it suitable for analog and low-end digital controllers. As noted in \cite{duru2021}, this lack of parameterization ensures consistent behaviour across a wide range of operating conditions, albeit at the cost of optimality.
+
+Despite its widespread use, CCCV exhibits significant drawbacks, particularly for fast charging applications. The most critical limitation is the prolonged duration of the CV phase when high CC rates are employed. A high charging current causes the terminal voltage to hit the cutoff limit early, leaving the cell partially charged; the subsequent CV phase must then deliver the remaining capacity at decaying current, which is inherently time-inefficient. This behaviour leads to diminishing returns: doubling the CC rate rarely halves the total charge time.
+
+Moreover, the fixed voltage threshold used in the CV phase is chosen for a fresh cell at room temperature. As the battery ages, its internal resistance rises and its open-circuit voltage (OCV) characteristics shift. A static voltage limit may therefore cause undercharging (reduced usable capacity) or, more dangerously, overcharging and lithium plating when the cell is cold or aged \cite{gonzalez2024determining}. Standard CCCV cannot adapt to such changes, creating a critical safety–performance trade-off \cite{beh2019pulse}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Model predictive control (MPC) has been extensively studied for charging optimization. By solving a finite-horizon optimal control problem at each step, MPC can explicitly enforce constraints on voltage, temperature, and state of charge (SoC). Zou et al. \cite{zou2016multi} demonstrated MPC for a single-cell electro-thermal model, while Yan et al. \cite{yan2020mpc} extended it to battery packs. However, MPC relies on an accurate parametric model; when the model is mismatched or when cell parameters vary, constraint satisfaction is not guaranteed and performance degrades.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Model Predictive Control (MPC) has garnered significant attention as an optimisation-based strategy for lithium-ion battery fast charging. Unlike conventional rule-based protocols such as CCCV, MPC employs a dynamic model of the battery to predict future system behaviour over a finite horizon and computes an optimal current profile by solving a constrained optimisation problem at each sampling instant. This receding-horizon approach enables the controller to anticipate future constraint violations, explicitly manage trade-offs between competing objectives, and incorporate multi-physical dynamics including electrical, thermal, and aging phenomena. Early work demonstrated the feasibility of MPC for single-cell electro-thermal control \cite{Zou}, while subsequent research extended the framework to battery packs, addressing cell-to-cell variations and balancing constraints \cite{Yan}. More recent contributions have refined both the modelling fidelity and the optimisation methodologies \cite{Wang2022,Hirt2024,Lu2024}, positioning MPC as a cornerstone of next-generation intelligent battery management systems.
+
+The principal advantage of MPC lies in its ability to explicitly enforce hard constraints on critical battery variables such as terminal voltage, current, state of charge, and temperature. By embedding these constraints directly into the optimisation problem, MPC can prevent operation in hazardous regions associated with accelerated degradation or safety risks, such as lithium plating under low-temperature, high-rate conditions \cite{Lu2024}. This constraint-handling capability is inherent to the formulation and does not require heuristic tuning of limit margins.
+
+Furthermore, MPC provides a systematic framework for multi-objective optimisation. Charging time, energy efficiency, and capacity fade can be weighted within a single cost function, allowing the controller to navigate the inherent trade-offs between fast charging and battery longevity. A nonlinear MPC formulation that incorporated an electro-thermal-aging coupled model achieved a 9.8\% reduction in charging time while simultaneously limiting capacity fade \cite{Wang2022}. The predictive nature of MPC also enables feedforward action; by forecasting future voltage or temperature trajectories, the controller can preemptively reduce current before a constraint is violated, yielding smoother and safer transients than purely reactive feedback schemes.
+
+
+Despite its theoretical and practical strengths, MPC faces several barriers that have impeded its widespread adoption in commercial battery management systems.
+
+The performance of MPC is contingent upon the accuracy of the embedded predictive model. Equivalent circuit models, while computationally tractable, are approximations of complex electrochemical dynamics; parametric uncertainties arising from cell aging, temperature variation, or manufacturing tolerances can lead to significant model mismatch. When the model is mismatched, the controller may either violate constraints inadvertently or become excessively conservative, sacrificing charge speed for perceived safety. An overestimated internal resistance, for instance, causes the controller to anticipate an artificially high voltage drop, resulting in unnecessary current derating and prolonged charge times \cite{Wang2022}.
+
+Computational complexity poses another practical hurdle. Solving a nonlinear, constrained optimisation problem at every sampling instant demands substantial computational resources, which are often limited in automotive-grade battery management systems. Although advances in efficient numerical solvers and explicit MPC (which pre-computes the control law offline) are narrowing this gap, real-time implementation of full-order nonlinear MPC remains challenging for high-volume, cost-sensitive applications.
+
+State estimation is a further prerequisite for MPC as the controller requires knowledge of the full system state, including state of charge, core temperature, and, in advanced formulations, degradation states such as solid-electrolyte interphase layer growth or lithium plating extent. These quantities are not directly measurable and must be inferred via observers such as Kalman filters. Estimation errors propagate directly into the control law and can degrade both safety and optimality.
+
+Battery parameters evolve gradually with cycling and abruptly under extreme conditions, yet standard MPC assumes time-invariant model coefficients. Without online adaptation, the controller's model fidelity deteriorates over the battery's lifetime, progressively compromising constraint satisfaction and performance.
+
+Recent research has sought to address these limitations through hybridisation with learning techniques and the integration of explicit health diagnostics.
+
+A learning-based approach that tunes MPC parameters via Bayesian optimisation has been proposed \cite{Hirt2024}. Rather than relying on an offline-calibrated model, this framework automatically adjusts cost function weights and constraint back-offs based on experimental charging cycles. This data-driven calibration reduces engineering effort for new cell chemistries and improves robustness to modelling errors without requiring structural model changes.
+
+A comprehensive health-aware fast charging strategy has been developed that tightly couples MPC with lithium plating detection and lifelong parameter updates \cite{Lu2024}. The controller monitors the voltage relaxation plateau following charging to detect the onset of lithium plating, a key degradation mechanism at low temperatures and high C-rates. Upon detection, the MPC adaptively tightens the voltage constraint to arrest further plating. Concurrently, a recursive least squares estimator continuously updates the equivalent circuit model parameters, ensuring the predictive model remains faithful to the cell's present condition. Experimental validation on aged cells demonstrated that this adaptive MPC extended cycle life by over thirty percent compared to a non-adaptive baseline \cite{Lu2024}.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Reinforcement Learning for Battery Control}
 Model-free RL methods such as deep Q-networks and proximal policy optimization (PPO) have been applied to battery charging and energy management \cite{liu2019brief, wu2020battery}. These methods can learn complex nonlinear policies without an explicit model, but they typically require millions of environment interactions, which is impractical for physical batteries. Moreover, standard RL does not incorporate safety constraints during training; a constraint-violating action can lead to terminal failure and wasted experience.
@@ -86,10 +123,11 @@ Several works have attempted to embed safety into RL for battery control. Wei et
 \subsection{Uncertainty Quantification and Ensemble Methods}
 Uncertainty-aware RL has recently gained attention for safety-critical applications. Lakshminarayanan et al. \cite{lakshminarayanan2017simple} showed that deep ensembles can provide well-calibrated uncertainty estimates. Chua et al. \cite{chua2018deep} used an ensemble of probabilistic neural networks for model-based RL. In battery prognostics, Gaussian process regression (GPR) is widely used for its principled uncertainty bounds \cite{liu2019gaussian}. Our work combines the strengths of GPR-like uncertainty (via quantile GRU/MLP and random forest variance) with the scalability of neural networks, and adaptively weights predictors online.
 
+\newpage
 \section{Problem Formulation}
 \label{sec:problem}
 
-We formulate the fast-charging problem as a **constrained Markov decision process (CMDP)** defined by the tuple $(\mathcal{S}, \mathcal{A}, P, r, c, \gamma)$. The environment is a high-fidelity simulation of a lithium-ion battery pack composed of $N$ cells connected in series.
+We formulate the fast-charging problem as a \textbf{constrained Markov decision process (CMDP)} defined by the tuple $(\mathcal{S}, \mathcal{A}, P, r, c, \gamma)$. The environment is a high-fidelity simulation of a lithium-ion battery pack composed of $N$ cells connected in series.
 
 \subsection{State Space}
 At each discrete time step $t$ (sampling interval $\Delta t = 1\,\mathrm{s}$), the agent observes a feature vector $s_t \in \mathcal{S}$ constructed from:
@@ -108,7 +146,7 @@ All continuous values are normalized to $[0,1]$ using running statistics collect
 The action $a_t \in \mathcal{A} = [0,1]$ is a normalized current command. The actual charging current applied to the pack is $I_t = a_t \cdot I_{\max}$, where $I_{\max} = 5\,\mathrm{C}$ (5 times the nominal 1\,C rate). Actions are held constant for the entire 1\,s step.
 
 \subsection{State Transitions}
-The true state of each cell evolves according to a coupled electro-thermal-aging model described in Section~\ref{sec:physics-model}. However, the agent does not observe the true SoC or internal states directly; instead it receives **estimated** quantities that emulate a realistic battery management system (BMS). The estimated SoC for cell $i$ is updated via Coulomb counting with additive Gaussian noise:
+The true state of each cell evolves according to a coupled electro-thermal-aging model described in Section~\ref{sec:physics-model}. However, the agent does not observe the true SoC or internal states directly; instead it receives estimated quantities that emulate a realistic battery management system (BMS). The estimated SoC for cell $i$ is updated via Coulomb counting with additive Gaussian noise:
 \begin{align}
 \hat{z}_{i,t+1} = \mathrm{clip}\!\left( \hat{z}_{i,t} + \eta_i\frac{I_t\,\Delta t}{C_i} + \epsilon_t,\ 0,\ 1 \right), \quad \epsilon_t \sim \mathcal{N}(0, \sigma_{\mathrm{soc}}^2),
 \label{eq:soc-update}
@@ -127,10 +165,10 @@ r_t = -\underbrace{\lambda_1\,\Delta t}_{\text{time penalty}}
 \end{align}
 where $\hat{D}_t$ is an estimate of instantaneous degradation rate derived from the model's internal resistance growth and SEI growth rate \cite{liu2018charging}. The constraint cost $c_t$ is defined as the indicator of any safety violation ($T_t > T_{\max}$ or $V_t > V_{\max}$), and the CMDP requires the expected cumulative cost over an episode to be below a threshold $d$.
 
-\section{Method: Safe Adaptive Ensemble Reinforcement Learning}
+\section{Methodology: Safe Adaptive Ensemble Reinforcement Learning}
 \label{sec:method}
 
-SAERL (Figure~\ref{fig:saerl-architecture}) consists of three tightly integrated modules: (1) a **predictive ensemble** that forecasts future SoC and terminal voltage with calibrated uncertainty; (2) an **adaptive gating network** that fuses the ensemble outputs based on real-time error and uncertainty; (3) a **residual policy** that outputs a correction to a baseline MPC action, combined with a **differentiable safety shield** that guarantees constraint satisfaction.
+SAERL (Figure~\ref{fig:saerl-architecture}) consists of three tightly integrated modules: (1) a \textbf{predictive ensemble} that forecasts future SoC and terminal voltage with calibrated uncertainty; (2) an \textbf{adaptive gating network} that fuses the ensemble outputs based on real-time error and uncertainty; (3) a \textbf{residual policy} that outputs a correction to a baseline MPC action, combined with a \textbf{differentiable safety shield} that guarantees constraint satisfaction.
 
 \begin{figure}[htbp]
     \centering
@@ -173,9 +211,9 @@ u_{m,t} = \frac{1}{K}\sum_{k=0}^{K-1} \mathrm{uncertainty}_{m,t-k}, \\
 where $W_1,W_2,b_1,b_2$ are learned jointly with the policy. This formulation allows the gate to down-weight a predictor that is either inaccurate or highly uncertain.
 
 \subsection{Residual Policy and Safety Shield}
-Rather than learning the charging current from scratch, SAERL learns a **residual** action $a_{\mathrm{res},t}$ that is added to a baseline MPC action $a_{\mathrm{mpc},t}$. The baseline MPC solves a simplified 5-step look-ahead optimal control problem using a lumped-parameter model \cite{yan2020mpc} and is always available. The raw action is $a_{\mathrm{raw},t} = \mathrm{clip}(a_{\mathrm{mpc},t} + a_{\mathrm{res},t}, 0, 1)$. The residual policy $\pi_\theta(a_{\mathrm{res}}|s_t)$ is parameterized by a Gaussian distribution with mean given by a two-layer MLP (256, 128) and a state-independent learned standard deviation.
+Rather than learning the charging current from scratch, SAERL learns a \textbf{residual} action $a_{\mathrm{res},t}$ that is added to a baseline MPC action $a_{\mathrm{mpc},t}$. The baseline MPC solves a simplified 5-step look-ahead optimal control problem using a lumped-parameter model \cite{yan2020mpc} and is always available. The raw action is $a_{\mathrm{raw},t} = \mathrm{clip}(a_{\mathrm{mpc},t} + a_{\mathrm{res},t}, 0, 1)$. The residual policy $\pi_\theta(a_{\mathrm{res}}|s_t)$ is parameterized by a Gaussian distribution with mean given by a two-layer MLP (256, 128) and a state-independent learned standard deviation.
 
-The raw action is passed through a **differentiable safety shield** that ensures all hard constraints are satisfied. The shield maintains a set of $N_{\mathrm{cand}}$ candidate actions uniformly spaced in $[0,1]$. For each candidate $a_{\mathrm{cand}}$, it performs a single-step simulation using the ensemble's fused prediction to estimate the resulting voltages and temperatures. It then selects:
+The raw action is passed through a \textbf{differentiable safety shield} that ensures all hard constraints are satisfied. The shield maintains a set of $N_{\mathrm{cand}}$ candidate actions uniformly spaced in $[0,1]$. For each candidate $a_{\mathrm{cand}}$, it performs a single-step simulation using the ensemble's fused prediction to estimate the resulting voltages and temperatures. It then selects:
 \begin{align}
 a_{\mathrm{safe},t} = \underset{a_{\mathrm{cand}}}{\mathrm{argmin}}\ |a_{\mathrm{cand}} - a_{\mathrm{raw},t}| \quad \text{s.t.} \quad 
 \begin{array}{l}
@@ -185,7 +223,7 @@ a_{\mathrm{safe},t} = \underset{a_{\mathrm{cand}}}{\mathrm{argmin}}\ |a_{\mathrm
 \end{array}
 \label{eq:shield}
 \end{align}
-If no candidate satisfies all constraints, the shield falls back to the **least-stress safe action**: the smallest non-zero current that still respects the constraints (or zero if necessary). An **anti-stall** mechanism ensures that the current never remains zero for more than 10 consecutive steps when SoC < 80\%, applying a minimal $0.1\,\mathrm{C}$ current to prevent premature termination.
+If no candidate satisfies all constraints, the shield falls back to the least-stress safe action: the smallest non-zero current that still respects the constraints (or zero if necessary). An \textbf{anti-stall} mechanism ensures that the current never remains zero for more than 10 consecutive steps when SoC < 80\%, applying a minimal $0.1\,\mathrm{C}$ current to prevent premature termination.
 
 \subsection{Training Procedure}
 SAERL is trained in two phases:
@@ -228,6 +266,9 @@ with $\rho_t(\theta)=\pi_\theta(a_{\mathrm{res},t}|s_t)/\pi_{\theta_{\mathrm{old
 \end{algorithmic}
 \end{algorithm}
 
+
+
+
 \section{Experimental Setup}
 \label{sec:experiments}
 
@@ -252,7 +293,7 @@ We compare SAERL against:
     \item \textbf{Static ensemble + PPO}: ensemble predictions are combined with fixed weights (equal), no adaptive gate.
 \end{itemize}
 
-All methods are evaluated under the **realistic protocol** with sensor noise and SoC estimation error. Each scenario is repeated five times with different random seeds; reported metrics are averaged over runs. The primary acceptance criterion is defined as: a controller **passes** a scenario if (i) it reaches 80\% SoC within 120\,min, (ii) no voltage or temperature violation exceeds $50\,\mathrm{ms}$ duration, and (iii) the final SoC is within $\pm2\%$ of the target.
+All methods are evaluated under the realistic protocol with sensor noise and SoC estimation error. Each scenario is repeated five times with different random seeds; reported metrics are averaged over runs. The primary acceptance criterion is defined as: a controller passes a scenario if (i) it reaches 80\% SoC within 120\,min, (ii) no voltage or temperature violation exceeds $50\,\mathrm{ms}$ duration, and (iii) the final SoC is within $\pm2\%$ of the target.
 
 \subsection{Training and Hyperparameters}
 The offline dataset is generated using the simulation environment with the same pack model. We train the GRU and MLP quantile predictors for 200 epochs with early stopping, using the Adam optimizer and a learning rate of $10^{-3}$. The random forest uses 150 trees, minimum samples per leaf = 5. For PPO, we use $\gamma = 0.99$, $\epsilon = 0.2$, learning rate $3\times10^{-4}$, and 4 epochs per update. The gate network is a 2-layer MLP with 64 hidden units. All experiments are conducted on a workstation with an NVIDIA RTX 3080 GPU and Intel i9-10900K CPU.
@@ -325,7 +366,7 @@ w/o residual (pure MPC baseline) & 96.8 & 0 & No \\
 \end{tabular}
 \end{table}
 
-The **safety shield** is the most critical component: removing it reduces charging time by 6.8\,min but leads to an average of 73.8 safety events per episode, failing the acceptance criterion. The adaptive gate improves both speed and safety compared to static weighting. Each predictor contributes positively; removing any one degrades performance, confirming that the ensemble provides complementary information.
+The \textbf{safety shield} is the most critical component: removing it reduces charging time by 6.8\,min but leads to an average of 73.8 safety events per episode, failing the acceptance criterion. The adaptive gate improves both speed and safety compared to static weighting. Each predictor contributes positively; removing any one degrades performance, confirming that the ensemble provides complementary information.
 
 \subsection{Family-Specific Tuning}
 We also evaluate two variants of SAERL that incorporate per-family knowledge:
@@ -333,7 +374,7 @@ We also evaluate two variants of SAERL that incorporate per-family knowledge:
     \item \textbf{family\_specific}: a separate policy and gate are fine-tuned for each dataset family (NASA, CALCE, MATR).
     \item \textbf{shared\_plus\_heads}: a shared base network with family-specific output heads.
 \end{itemize}
-Both variants achieve **zero safety events** across all 15 scenarios, but at the cost of increased time-to-80\% (family\_specific: +4.55\,min; shared\_plus\_heads: +14.76\,min relative to global). Their acceptance rates are 6/15 (family\_specific) and 0/15 (shared\_plus\_heads). This trade-off highlights that aggressive safety can overly constrain charging speed; the global policy strikes a better balance for the current pass criteria.
+Both variants achieve zero safety events across all 15 scenarios, but at the cost of increased time-to-80\% (family\_specific: +4.55\,min; shared\_plus\_heads: +14.76\,min relative to global). Their acceptance rates are 6/15 (family\_specific) and 0/15 (shared\_plus\_heads). This trade-off highlights that aggressive safety can overly constrain charging speed; the global policy strikes a better balance for the current pass criteria.
 
 \subsection{Inference Latency}
 SAERL's per-step inference time averages 26.3\,ms on the CPU (Intel i9-10900K), well within the typical BMS real-time requirement of 100\,ms. The majority of the time is spent in the ensemble forward passes; the shield's candidate evaluation is highly parallelizable. With GPU acceleration, latency drops to 11.7\,ms.
@@ -341,11 +382,21 @@ SAERL's per-step inference time averages 26.3\,ms on the CPU (Intel i9-10900K), 
 \section{Discussion}
 \label{sec:discussion}
 
-SAERL's 40\% pass rate, while far from perfect, represents a substantial advance over the 0\% achieved by both CCCV and MPC under the same realistic protocol. The key enablers are threefold. First, the **ensemble with adaptive gating** provides robust one-step predictions even when individual models are uncertain; the gate's ability to down-weight high-uncertainty predictors prevents the policy from acting on unreliable forecasts. Second, the **residual formulation** dramatically accelerates learning---the policy only needs to learn corrections to a reasonable baseline, rather than discovering viable charging currents from random initialization. Third, the **differentiable safety shield** offers a strong inductive bias: the agent is free to explore aggressive actions, but the shield ensures that the environment never experiences unsafe voltages or temperatures. This separation of concerns (optimization vs. constraint satisfaction) is crucial for safe RL in physical systems.
+SAERL's 40\% pass rate, while far from perfect, represents a substantial advance over the 0\% achieved by both CCCV and MPC under the same realistic protocol. The key enablers are threefold. First, the ensemble with adaptive gating provides robust one-step predictions even when individual models are uncertain; the gate's ability to down-weight high-uncertainty predictors prevents the policy from acting on unreliable forecasts. Second, the \textbf{residual formulation} dramatically accelerates learning---the policy only needs to learn corrections to a reasonable baseline, rather than discovering viable charging currents from random initialization. Third, the \textbf{differentiable safety shield} offers a strong inductive bias: the agent is free to explore aggressive actions, but the shield ensures that the environment never experiences unsafe voltages or temperatures. This separation of concerns (optimization vs. constraint satisfaction) is crucial for safe RL in physical systems.
 
 Why does SAERL still fail in 9/15 scenarios? The failures are concentrated in high-ambient-temperature cases where the safety shield, to maintain zero predicted violations, often drives the current to the anti-stall floor ($0.1\,\mathrm{C}$). This prolongs charging and, in three instances, still results in brief overtemperature events when the model's prediction error underestimates thermal accumulation. Improving the ensemble's calibration under thermal stress---perhaps by including explicit temperature rate features---is a clear next step.
 
 Another notable finding is that family-specific tuning eliminates all safety events but at a speed penalty. This suggests that a single global policy must trade off between families; a practical deployment might use a meta-learner that adapts quickly to a new family given a few episodes, an avenue we leave for future work.
+
+The core innovations are:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Uncertainty-aware ensemble}: Predictors are trained to output both point estimates and quantiles; their predictions are fused online by a neural gate that adapts based on each model's recent error and epistemic uncertainty.
+    \item \textbf{Residual RL over a safe baseline}: The policy learns corrections to an MPC baseline, accelerating learning while preserving a fallback safety layer that intervenes whenever constraints are threatened.
+    \item \textbf{Realistic evaluation protocol}: We simulate continuous state estimation with additive sensor noise and explicitly model cell-to-cell capacity and resistance spreads, moving beyond single-cell, noise-free evaluations.
+    \item \textbf{Comprehensive validation}: Using 15 scenarios from three public datasets, SAERL achieves a 40\% acceptance rate (6/15 scenarios) under stringent pass criteria---a substantial improvement over 0\% for both CCCV and MPC. SAERL matches MPC's zero-safety-event capability in 12/15 runs while being 8.6\% faster to 80\% SoC, and reduces safety violations by 97.3\% compared to CCCV.
+\end{enumerate}
+
 
 \section{Limitations and Future Work}
 \label{sec:limitations}
@@ -389,102 +440,7 @@ The authors declare no competing interests.
 The authors thank Dr. Tong Zhao (University of Oxford) for insightful discussions on battery pack modeling and Dr. Bo Li (Tsinghua University) for providing the MATR.io preprocessed dataset.
 
 \bibliographystyle{unsrtnat}
-\begin{thebibliography}{99}
-\bibitem{hu2020advanced}
-X. Hu, K. Zhang, K. Liu, X. Lin, S. Dey, and S. Onori,
-``Advanced fault diagnosis for lithium-ion battery systems: a review of fault mechanisms, fault features, and diagnosis procedures,''
-\textit{IEEE Industrial Electronics Magazine}, vol. 14, no. 3, pp. 65--91, 2020.
-
-\bibitem{tomaszewska2019lithium}
-A. Tomaszewska et al.,
-``Lithium-ion battery fast charging: a review,''
-\textit{eTransportation}, vol. 1, p. 100011, 2019.
-
-\bibitem{liu2018charging}
-K. Liu, C. Zou, K. Li, and T. Wik,
-``Charging pattern optimization for lithium-ion batteries with an electrothermal-aging model,''
-\textit{IEEE Transactions on Industrial Informatics}, vol. 14, no. 12, pp. 5463--5474, 2018.
-
-\bibitem{zou2016multi}
-C. Zou, C. Manzie, D. Nešić, and A. G. Kallapur,
-``Multi-time-scale observer design for state-of-charge and state-of-health of a lithium-ion battery,''
-\textit{Journal of Power Sources}, vol. 335, pp. 121--130, 2016.
-
-\bibitem{liu2019brief}
-K. Liu, K. Li, Q. Peng, and C. Zhang,
-``A brief review on key technologies in the battery management system of electric vehicles,''
-\textit{Frontiers of Mechanical Engineering}, vol. 14, no. 1, pp. 47--64, 2019.
-
-\bibitem{waldmann2014optimization}
-T. Waldmann, M. Wilka, M. Kasper, M. Fleischhammer, and M. Wohlfahrt-Mehrens,
-``Temperature dependent ageing mechanisms in lithium-ion batteries - a post-mortem study,''
-\textit{Journal of Power Sources}, vol. 262, pp. 129--135, 2014.
-
-\bibitem{beh2019pulse}
-H. Z. Beh, I. Z. Abidin, and A. J. Forsyth,
-``Pulse charging of lithium-ion batteries: a review,''
-\textit{IET Electrical Systems in Transportation}, vol. 9, no. 3, pp. 101--109, 2019.
-
-\bibitem{yan2020mpc}
-G. Yan, J. Jiang, W. Zhang, X. Fan, and Y. Zou,
-``Model predictive control-based fast charging strategy for lithium-ion batteries,''
-\textit{IEEE Transactions on Industrial Electronics}, vol. 67, no. 9, pp. 7454--7464, 2020.
-
-\bibitem{wu2020battery}
-J. Wu, Z. Wei, K. Liu, Z. Quan, and Y. Li,
-``Battery-involved energy management for hybrid electric bus based on expert-assistance deep deterministic policy gradient algorithm,''
-\textit{IEEE Transactions on Vehicular Technology}, vol. 69, no. 11, pp. 12786--12796, 2020.
-
-\bibitem{wei2021safe}
-Z. Wei, J. Zhao, D. Ji, and K. J. Tseng,
-``Safe reinforcement learning for fast charging of lithium-ion batteries,''
-\textit{IEEE Transactions on Industrial Informatics}, vol. 17, no. 6, pp. 3912--3922, 2021.
-
-\bibitem{lakshminarayanan2017simple}
-B. Lakshminarayanan, A. Pritzel, and C. Blundell,
-``Simple and scalable predictive uncertainty estimation using deep ensembles,''
-in \textit{Advances in Neural Information Processing Systems}, 2017, pp. 6402--6413.
-
-\bibitem{chua2018deep}
-K. Chua, R. Calandra, R. McAllister, and S. Levine,
-``Deep reinforcement learning in a handful of trials using probabilistic dynamics models,''
-in \textit{Advances in Neural Information Processing Systems}, 2018, pp. 4754--4765.
-
-\bibitem{liu2019gaussian}
-K. Liu, Y. Li, X. Hu, M. Lucu, and W. D. Widanage,
-``Gaussian process regression with automatic relevance determination kernel for calendar aging prediction of lithium-ion batteries,''
-\textit{IEEE Transactions on Industrial Informatics}, vol. 16, no. 6, pp. 3767--3777, 2019.
-
-\bibitem{koenker2001quantile}
-R. Koenker and K. F. Hallock,
-``Quantile regression,''
-\textit{Journal of Economic Perspectives}, vol. 15, no. 4, pp. 143--156, 2001.
-
-\bibitem{tang2021model}
-X. Tang, K. Liu, X. Wang, F. Gao, J. Macro, and W. D. Widanage,
-``Model migration neural network for predicting battery aging trajectories,''
-\textit{IEEE Transactions on Transportation Electrification}, vol. 6, no. 2, pp. 363--374, 2020.
-
-\bibitem{schulman2017proximal}
-J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov,
-``Proximal policy optimization algorithms,''
-\textit{arXiv preprint arXiv:1707.06347}, 2017.
-
-\bibitem{saha2008battery}
-B. Saha and K. Goebel,
-``Battery data set,''
-NASA Ames Prognostics Data Repository, 2008.
-
-\bibitem{xing2014battery}
-Y. Xing, E. W. Ma, K. L. Tsui, and M. Pecht,
-``A novel method for lithium-ion battery remaining useful life prediction using time window and Bayesian Monte Carlo,''
-\textit{Microelectronics Reliability}, vol. 54, no. 9--10, pp. 2201--2208, 2014.
-
-\bibitem{severson2019data}
-K. A. Severson et al.,
-``Data-driven prediction of battery cycle life before capacity degradation,''
-\textit{Nature Energy}, vol. 4, no. 5, pp. 383--391, 2019.
-\end{thebibliography}
+\bibliography{references}
 
 \appendix
 \section{Hyperparameters}

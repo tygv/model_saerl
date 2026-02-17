@@ -1,0 +1,152 @@
+[
+  {
+    "scenario_id": "F1_NASA",
+    "description": "Fast charge (4C) on fresh NASA cell at 25C",
+    "dataset": "nasa",
+    "ambient_temp_c": 25.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 4.0,
+    "max_voltage_v": 4.2
+  },
+  {
+    "scenario_id": "S1_NASA",
+    "description": "Safe charge (3C) on fresh NASA cell at 25C",
+    "dataset": "nasa",
+    "ambient_temp_c": 25.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 3.0,
+    "max_voltage_v": 4.15
+  },
+  {
+    "scenario_id": "L1_NASA",
+    "description": "Long-life charge (2C) on fresh NASA cell at 25C",
+    "dataset": "nasa",
+    "ambient_temp_c": 25.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 2.0,
+    "max_voltage_v": 4.1
+  },
+  {
+    "scenario_id": "F2_CALCE",
+    "description": "Fast charge (4C) on aged CALCE cell at 25C",
+    "dataset": "calce",
+    "ambient_temp_c": 25.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 4.0,
+    "max_voltage_v": 4.2
+  },
+  {
+    "scenario_id": "S2_CALCE",
+    "description": "Safe charge (3C) on aged CALCE cell at 25C",
+    "dataset": "calce",
+    "ambient_temp_c": 25.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 3.0,
+    "max_voltage_v": 4.15
+  },
+  {
+    "scenario_id": "L2_CALCE",
+    "description": "Long-life charge (2C) on aged CALCE cell at 25C",
+    "dataset": "calce",
+    "ambient_temp_c": 25.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 2.0,
+    "max_voltage_v": 4.1
+  },
+  {
+    "scenario_id": "F3_MATR",
+    "description": "Fast charge (4C) on cold MATR cell at 0C (ambient 0C)",
+    "dataset": "matr",
+    "ambient_temp_c": 0.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 4.0,
+    "max_voltage_v": 4.2
+  },
+  {
+    "scenario_id": "S3_MATR",
+    "description": "Safe charge (3C) on cold MATR cell at 0C (ambient 0C)",
+    "dataset": "matr",
+    "ambient_temp_c": 0.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 3.0,
+    "max_voltage_v": 4.15
+  },
+  {
+    "scenario_id": "L3_MATR",
+    "description": "Long-life charge (2C) on cold MATR cell at 0C (ambient 0C)",
+    "dataset": "matr",
+    "ambient_temp_c": 0.0,
+    "initial_soc": 0.20,
+    "target_soc": 0.80,
+    "max_c_rate": 2.0,
+    "max_voltage_v": 4.1
+  },
+  {
+    "scenario_id": "F4_NASA_AGED",
+    "description": "Fast charge (4C) on heavily aged NASA cell at 40C",
+    "dataset": "nasa",
+    "ambient_temp_c": 40.0,
+    "initial_soc": 0.10,
+    "target_soc": 0.80,
+    "max_c_rate": 4.0,
+    "max_voltage_v": 4.2
+  },
+  {
+    "scenario_id": "S4_NASA_AGED",
+    "description": "Safe charge (3C) on heavily aged NASA cell at 40C",
+    "dataset": "nasa",
+    "ambient_temp_c": 40.0,
+    "initial_soc": 0.10,
+    "target_soc": 0.80,
+    "max_c_rate": 3.0,
+    "max_voltage_v": 4.15
+  },
+  {
+    "scenario_id": "L4_NASA_AGED",
+    "description": "Long-life charge (2C) on heavily aged NASA cell at 40C",
+    "dataset": "nasa",
+    "ambient_temp_c": 40.0,
+    "initial_soc": 0.10,
+    "target_soc": 0.80,
+    "max_c_rate": 2.0,
+    "max_voltage_v": 4.1
+  },
+  {
+    "scenario_id": "F5_MATR_VAR",
+    "description": "Fast charge (4C) on variable MATR cell at 10C",
+    "dataset": "matr",
+    "ambient_temp_c": 10.0,
+    "initial_soc": 0.30,
+    "target_soc": 0.80,
+    "max_c_rate": 4.0,
+    "max_voltage_v": 4.2
+  },
+  {
+    "scenario_id": "S5_MATR_VAR",
+    "description": "Safe charge (3C) on variable MATR cell at 10C",
+    "dataset": "matr",
+    "ambient_temp_c": 10.0,
+    "initial_soc": 0.30,
+    "target_soc": 0.80,
+    "max_c_rate": 3.0,
+    "max_voltage_v": 4.15
+  },
+  {
+    "scenario_id": "L5_MATR_VAR",
+    "description": "Long-life charge (2C) on variable MATR cell at 10C",
+    "dataset": "matr",
+    "ambient_temp_c": 10.0,
+    "initial_soc": 0.30,
+    "target_soc": 0.80,
+    "max_c_rate": 2.0,
+    "max_voltage_v": 4.1
+  }
+]

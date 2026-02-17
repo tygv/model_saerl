@@ -36,7 +36,38 @@ class CellParameters:
 
 
 class CellModel:
-    """Physics-based model for a single battery cell."""
+    """Physics-based model for a single battery cell.
+
+    This class implements a 2nd-order Thevenin Equivalent Circuit Model (ECM) coupled with
+    a lumped thermal model and a semi-empirical aging model.
+
+    Governing Equations:
+    --------------------
+    1. State of Charge (SoC):
+       d(SoC)/dt = -eta * I / (Q_nominal * 3600)
+
+    2. Circuit Dynamics (2-RC pairs):
+       d(v1)/dt = -v1 / (R1 * C1) + I / C1
+       d(v2)/dt = -v2 / (R2 * C2) + I / C2
+       V_terminal = V_ocv(SoC) - I * R0 - v1 - v2
+
+    3. Thermal Dynamics (Lumped capacitance):
+       d(T)/dt = (Q_gen - Q_diss) / C_th
+       Q_gen = I^2 * (R0 + R0_growth)
+       Q_diss = hA * (T - T_ambient)
+
+    4. Degradation (Aging):
+       Capacity Fade: d(Q_loss)/dt = k1 * S_I * S_T * S_SoC
+       Resistance Growth: R0_growth = 2 * R0 * (Q_loss / Q_nominal)
+       where S_I, S_T, S_SoC are stress factors for current, temperature, and SoC.
+
+    Notation:
+    - I: Current (Amps), positive = discharge
+    - T: Cell temperature (C)
+    - v1, v2: Overpotentials across RC pairs
+    - R0, R1, R2: Ohmic and polarization resistances
+    - C1, C2: Polarization capacitances
+    """
 
     def __init__(self, cell_id: int, params: CellParameters | Dict, dt: float = 1.0):
         self.cell_id = cell_id

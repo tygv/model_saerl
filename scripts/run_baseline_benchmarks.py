@@ -192,7 +192,22 @@ class CCCVController:
 
 
 class RolloutMPCController:
-    """Rollout MPC with receding horizon and action-grid search."""
+    """Rollout MPC with receding horizon and action-grid search.
+
+    Implementation Details:
+    - Model: Uses a perfect copy of the plant (via deepcopy) for rollouts.
+    - Horizon: Fixed horizon (N steps), default 8.
+    - Optimization: Brute-force shooting method over a coarse action grid.
+      Discretizes input space into `action_grid_points` (default 7) and selects
+      the constant action sequence that minimizes the cumulative cost.
+    - Cost Function: Weighted sum of squared errors associated with:
+      - SoC tracking (target 80%)
+      - Voltage limits (soft constraint)
+      - Temperature limits (soft constraint)
+      - Cell imbalance (minimization)
+      - Control effort (current magnitude)
+      - Smoothness (change in action)
+    """
 
     def __init__(
         self,
@@ -401,6 +416,7 @@ def compute_metrics(results: pd.DataFrame, target_soc: float) -> Dict[str, float
         "energy_in_kwh": trapz_integral(-power_w, time_s) / 3600.0 / 1000.0,
         "safety_event_count": safety_total,
         "safety_event_timesteps": safety_event_timesteps,
+        "reached_80_soc": float(1.0 if results["pack_soc"].max() >= 0.8 else 0.0),            
     }
     return metrics
 
