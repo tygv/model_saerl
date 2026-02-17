@@ -5,7 +5,7 @@
   "cv_voltage_v": 83.0,
   "max_charge_current_a": 0.7429293334484101,
   "config": {
-    "objective": "all",
+    "objective": "safe",
     "output_root": "results/baselines",
     "max_steps": 1800,
     "initial_soc": 0.2,
@@ -20,7 +20,7 @@
     "standardized_root": "data/standardized",
     "params_root": "data/standardized_params",
     "dataset_families": "nasa,calce,matr",
-    "max_files_per_dataset": 1,
+    "max_files_per_dataset": 3,
     "data_is_cell_level": true,
     "include_cell_figures": false
   },
@@ -56,7 +56,7 @@
     "time_to_80_soc_min": NaN,
     "time_to_90_soc_min": NaN,
     "peak_pack_voltage_v": 78.76599788764989,
-    "peak_pack_temperature_c": 25.016987224109013,
+    "peak_pack_temperature_c": 25.01698722410901,
     "peak_voltage_imbalance_mv": 52.73916955538116,
     "mean_charge_current_a": 0.7429293334484103,
     "peak_charge_current_a": 0.7429293334484101,

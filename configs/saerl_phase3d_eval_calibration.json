@@ -1,0 +1,106 @@
+{
+  "defaults": {
+    "saerl_score_soc_gain_weight": 185.0,
+    "saerl_score_time_weight": 1.35,
+    "saerl_score_temp_weight": 36.0,
+    "saerl_score_degradation_weight": 20.0,
+    "saerl_score_imbalance_weight": 0.007,
+    "saerl_score_safety_weight": 410.0,
+    "saerl_score_risk_weight": 1.1,
+    "saerl_min_safe_charge_fraction": 0.28,
+    "saerl_anti_stall_soc_gap": 0.20,
+    "saerl_anti_stall_low_risk_threshold": 0.60,
+    "saerl_anti_stall_duration_s": 40.0,
+    "saerl_risk_uncertainty_weight": 0.22,
+    "saerl_risk_temp_weight": 8.5,
+    "saerl_risk_voltage_weight": 8.5,
+    "saerl_risk_imbalance_weight": 0.02
+  },
+  "objectives": {
+    "fastest": {
+      "saerl_score_soc_gain_weight": 245.0,
+      "saerl_score_time_weight": 1.95,
+      "saerl_min_safe_charge_fraction": 0.34,
+      "saerl_anti_stall_soc_gap": 0.15,
+      "saerl_anti_stall_duration_s": 22.0,
+      "saerl_risk_uncertainty_weight": 0.18
+    },
+    "safe": {
+      "saerl_score_temp_weight": 52.0,
+      "saerl_score_safety_weight": 620.0,
+      "saerl_score_risk_weight": 1.5,
+      "saerl_min_safe_charge_fraction": 0.26,
+      "saerl_risk_uncertainty_weight": 0.26
+    },
+    "long_life": {
+      "saerl_score_degradation_weight": 30.0,
+      "saerl_score_time_weight": 1.5,
+      "saerl_min_safe_charge_fraction": 0.25,
+      "saerl_risk_uncertainty_weight": 0.24
+    }
+  },
+  "families": {
+    "calce": {
+      "saerl_score_soc_gain_weight": 275.0,
+      "saerl_score_time_weight": 2.15,
+      "saerl_min_safe_charge_fraction": 0.50,
+      "saerl_anti_stall_soc_gap": 0.13,
+      "saerl_anti_stall_low_risk_threshold": 0.70,
+      "saerl_anti_stall_duration_s": 16.0,
+      "saerl_risk_uncertainty_weight": 0.16,
+      "saerl_calibration_scale_gru": 0.9,
+      "saerl_calibration_scale_mlp": 0.9,
+      "saerl_calibration_scale_rf": 0.85
+    },
+    "matr": {
+      "saerl_score_soc_gain_weight": 262.0,
+      "saerl_score_time_weight": 2.05,
+      "saerl_min_safe_charge_fraction": 0.42,
+      "saerl_anti_stall_soc_gap": 0.14,
+      "saerl_anti_stall_low_risk_threshold": 0.66,
+      "saerl_anti_stall_duration_s": 20.0,
+      "saerl_risk_uncertainty_weight": 0.17,
+      "saerl_calibration_scale_gru": 0.92,
+      "saerl_calibration_scale_mlp": 0.9,
+      "saerl_calibration_scale_rf": 0.88
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "saerl_score_soc_gain_weight": 310.0,
+        "saerl_score_time_weight": 2.35,
+        "saerl_min_safe_charge_fraction": 0.56,
+        "saerl_anti_stall_duration_s": 12.0,
+        "saerl_risk_uncertainty_weight": 0.14
+      },
+      "safe": {
+        "saerl_score_temp_weight": 60.0,
+        "saerl_score_safety_weight": 700.0,
+        "saerl_min_safe_charge_fraction": 0.45
+      },
+      "long_life": {
+        "saerl_score_degradation_weight": 35.0,
+        "saerl_min_safe_charge_fraction": 0.42
+      }
+    },
+    "matr": {
+      "fastest": {
+        "saerl_score_soc_gain_weight": 298.0,
+        "saerl_score_time_weight": 2.28,
+        "saerl_min_safe_charge_fraction": 0.48,
+        "saerl_anti_stall_duration_s": 15.0,
+        "saerl_risk_uncertainty_weight": 0.15
+      },
+      "safe": {
+        "saerl_score_temp_weight": 58.0,
+        "saerl_score_safety_weight": 680.0,
+        "saerl_min_safe_charge_fraction": 0.37
+      },
+      "long_life": {
+        "saerl_score_degradation_weight": 33.0,
+        "saerl_min_safe_charge_fraction": 0.35
+      }
+    }
+  }
+}

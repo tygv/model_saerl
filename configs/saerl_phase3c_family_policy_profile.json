@@ -1,0 +1,101 @@
+{
+  "defaults": {
+    "saerl_score_soc_gain_weight": 150.0,
+    "reward_soc_gain_weight": 22.0,
+    "saerl_score_time_weight": 0.8,
+    "saerl_score_temp_weight": 34.0,
+    "saerl_score_degradation_weight": 18.0,
+    "saerl_score_imbalance_weight": 0.008,
+    "saerl_score_safety_weight": 360.0,
+    "saerl_score_risk_weight": 1.2,
+    "saerl_anti_stall_soc_gap": 0.22,
+    "saerl_anti_stall_low_risk_threshold": 0.5,
+    "saerl_anti_stall_duration_s": 70.0,
+    "saerl_min_safe_charge_fraction": 0.24
+  },
+  "objectives": {
+    "fastest": {
+      "reward_soc_gain_weight": 28.0,
+      "saerl_score_soc_gain_weight": 210.0,
+      "saerl_score_time_weight": 0.6,
+      "saerl_anti_stall_soc_gap": 0.18,
+      "saerl_anti_stall_duration_s": 40.0
+    },
+    "safe": {
+      "reward_soc_gain_weight": 20.0,
+      "saerl_score_soc_gain_weight": 145.0,
+      "saerl_score_temp_weight": 46.0,
+      "saerl_score_safety_weight": 500.0,
+      "saerl_score_risk_weight": 1.5,
+      "saerl_anti_stall_low_risk_threshold": 0.42
+    },
+    "long_life": {
+      "reward_soc_gain_weight": 18.0,
+      "reward_q_loss_penalty_weight": 3.4,
+      "saerl_score_soc_gain_weight": 130.0,
+      "saerl_score_degradation_weight": 24.0,
+      "saerl_score_time_weight": 1.1
+    }
+  },
+  "families": {
+    "nasa": {
+      "saerl_min_safe_charge_fraction": 0.24,
+      "saerl_anti_stall_duration_s": 70.0
+    },
+    "calce": {
+      "saerl_min_safe_charge_fraction": 0.42,
+      "saerl_anti_stall_soc_gap": 0.20,
+      "saerl_anti_stall_low_risk_threshold": 0.58,
+      "saerl_anti_stall_duration_s": 48.0,
+      "saerl_score_soc_gain_weight": 195.0,
+      "reward_soc_gain_weight": 27.0
+    },
+    "matr": {
+      "saerl_min_safe_charge_fraction": 0.32,
+      "saerl_anti_stall_soc_gap": 0.21,
+      "saerl_anti_stall_low_risk_threshold": 0.52,
+      "saerl_anti_stall_duration_s": 58.0,
+      "saerl_score_soc_gain_weight": 178.0,
+      "reward_soc_gain_weight": 25.0
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "saerl_min_safe_charge_fraction": 0.52,
+        "saerl_anti_stall_soc_gap": 0.16,
+        "saerl_anti_stall_duration_s": 35.0,
+        "saerl_score_soc_gain_weight": 240.0,
+        "reward_soc_gain_weight": 32.0
+      },
+      "safe": {
+        "saerl_min_safe_charge_fraction": 0.38,
+        "saerl_score_temp_weight": 55.0,
+        "saerl_score_safety_weight": 580.0
+      },
+      "long_life": {
+        "saerl_min_safe_charge_fraction": 0.34,
+        "reward_q_loss_penalty_weight": 4.2,
+        "saerl_score_degradation_weight": 28.0
+      }
+    },
+    "matr": {
+      "fastest": {
+        "saerl_min_safe_charge_fraction": 0.40,
+        "saerl_anti_stall_soc_gap": 0.17,
+        "saerl_anti_stall_duration_s": 42.0,
+        "saerl_score_soc_gain_weight": 220.0
+      },
+      "safe": {
+        "saerl_min_safe_charge_fraction": 0.30,
+        "saerl_score_temp_weight": 52.0,
+        "saerl_score_safety_weight": 560.0
+      },
+      "long_life": {
+        "saerl_min_safe_charge_fraction": 0.28,
+        "reward_q_loss_penalty_weight": 3.8,
+        "saerl_score_degradation_weight": 27.0
+      }
+    }
+  }
+}

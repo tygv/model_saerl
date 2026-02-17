@@ -1,0 +1,102 @@
+{
+  "global": {
+    "horizon": 5,
+    "iterations": 3,
+    "population": 48,
+    "elite_frac": 0.2,
+    "soc_gap_weight": 150.0,
+    "voltage_weight": 70.0,
+    "temp_weight": 42.0,
+    "imbalance_weight": 0.006,
+    "current_weight": 0.006,
+    "q_loss_weight": 15.0,
+    "safety_weight": 650.0,
+    "hard_violation_weight": 1600.0,
+    "progress_bonus_weight": 20.0,
+    "current_floor_fraction": 0.2,
+    "current_floor_penalty_weight": 6.0
+  },
+  "objectives": {
+    "fastest": {
+      "progress_bonus_weight": 30.0,
+      "current_floor_fraction": 0.26,
+      "current_floor_penalty_weight": 9.0,
+      "q_loss_weight": 12.0
+    },
+    "safe": {
+      "progress_bonus_weight": 16.0,
+      "temp_weight": 58.0,
+      "voltage_weight": 86.0,
+      "safety_weight": 850.0,
+      "current_floor_fraction": 0.18
+    },
+    "long_life": {
+      "progress_bonus_weight": 14.0,
+      "q_loss_weight": 22.0,
+      "current_weight": 0.012,
+      "temp_weight": 55.0,
+      "current_floor_fraction": 0.16
+    }
+  },
+  "families": {
+    "calce": {
+      "horizon": 6,
+      "iterations": 4,
+      "population": 56,
+      "soc_gap_weight": 175.0,
+      "progress_bonus_weight": 36.0,
+      "current_floor_fraction": 0.40,
+      "current_floor_penalty_weight": 14.0,
+      "q_loss_weight": 13.0
+    },
+    "matr": {
+      "horizon": 5,
+      "iterations": 3,
+      "population": 52,
+      "soc_gap_weight": 165.0,
+      "progress_bonus_weight": 30.0,
+      "current_floor_fraction": 0.30,
+      "current_floor_penalty_weight": 11.0,
+      "q_loss_weight": 14.0
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "progress_bonus_weight": 46.0,
+        "current_floor_fraction": 0.48,
+        "current_floor_penalty_weight": 18.0,
+        "q_loss_weight": 10.0
+      },
+      "safe": {
+        "progress_bonus_weight": 20.0,
+        "temp_weight": 70.0,
+        "voltage_weight": 95.0,
+        "current_floor_fraction": 0.34,
+        "current_floor_penalty_weight": 13.0
+      },
+      "long_life": {
+        "progress_bonus_weight": 18.0,
+        "q_loss_weight": 28.0,
+        "current_floor_fraction": 0.30
+      }
+    },
+    "matr": {
+      "fastest": {
+        "progress_bonus_weight": 38.0,
+        "current_floor_fraction": 0.36,
+        "current_floor_penalty_weight": 14.0
+      },
+      "safe": {
+        "progress_bonus_weight": 18.0,
+        "temp_weight": 64.0,
+        "current_floor_fraction": 0.26
+      },
+      "long_life": {
+        "progress_bonus_weight": 16.0,
+        "q_loss_weight": 24.0,
+        "current_floor_fraction": 0.24
+      }
+    }
+  }
+}

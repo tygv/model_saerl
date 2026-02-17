@@ -1,0 +1,58 @@
+{
+  "defaults": {
+    "saerl_score_soc_gain_weight": 140.0,
+    "saerl_score_time_weight": 1.25,
+    "saerl_score_degradation_weight": 13.0,
+    "saerl_min_safe_charge_fraction": 0.42,
+    "saerl_anti_stall_low_risk_threshold": 0.6,
+    "saerl_anti_stall_duration_s": 14.0
+  },
+  "families": {
+    "calce": {
+      "saerl_score_soc_gain_weight": 185.0,
+      "saerl_score_time_weight": 1.6,
+      "saerl_score_degradation_weight": 8.0,
+      "saerl_min_safe_charge_fraction": 0.68,
+      "saerl_anti_stall_low_risk_threshold": 0.78,
+      "saerl_anti_stall_duration_s": 6.0,
+      "saerl_anti_stall_risk_scale": 6.5
+    },
+    "matr": {
+      "saerl_score_soc_gain_weight": 165.0,
+      "saerl_score_time_weight": 1.45,
+      "saerl_score_degradation_weight": 10.0,
+      "saerl_min_safe_charge_fraction": 0.58,
+      "saerl_anti_stall_low_risk_threshold": 0.72,
+      "saerl_anti_stall_duration_s": 8.0,
+      "saerl_anti_stall_risk_scale": 6.0
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "saerl_score_soc_gain_weight": 220.0,
+        "saerl_score_time_weight": 2.2,
+        "saerl_score_degradation_weight": 6.5,
+        "saerl_min_safe_charge_fraction": 0.74,
+        "saerl_anti_stall_low_risk_threshold": 0.84,
+        "saerl_anti_stall_duration_s": 4.0
+      },
+      "safe": {
+        "saerl_score_soc_gain_weight": 195.0,
+        "saerl_score_time_weight": 1.75,
+        "saerl_score_degradation_weight": 8.0,
+        "saerl_min_safe_charge_fraction": 0.7,
+        "saerl_anti_stall_low_risk_threshold": 0.8,
+        "saerl_anti_stall_duration_s": 5.0
+      },
+      "long_life": {
+        "saerl_score_soc_gain_weight": 185.0,
+        "saerl_score_time_weight": 1.65,
+        "saerl_score_degradation_weight": 8.5,
+        "saerl_min_safe_charge_fraction": 0.68,
+        "saerl_anti_stall_low_risk_threshold": 0.78,
+        "saerl_anti_stall_duration_s": 5.0
+      }
+    }
+  }
+}

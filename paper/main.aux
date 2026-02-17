@@ -1,0 +1,145 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{hu2020advanced,tomaszewska2019lithium}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:introduction}{{1}{1}{Introduction}{section.1}{}}
+\newlabel{sec:introduction@cref}{{[section][1][]1}{[1][1][]1}{}{}{}}
+\citation{liu2018charging}
+\citation{zou2016multi}
+\citation{liu2019brief}
+\citation{waldmann2014optimization}
+\citation{liu2018charging}
+\citation{beh2019pulse}
+\citation{zou2016multi}
+\citation{yan2020mpc}
+\citation{liu2019brief,wu2020battery}
+\citation{wei2021safe}
+\citation{lakshminarayanan2017simple}
+\citation{chua2018deep}
+\citation{liu2019gaussian}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background and Related Work}{3}{section.2}\protected@file@percent }
+\newlabel{sec:related-work}{{2}{3}{Background and Related Work}{section.2}{}}
+\newlabel{sec:related-work@cref}{{[section][2][]2}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Charging Strategies}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Reinforcement Learning for Battery Control}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Uncertainty Quantification and Ensemble Methods}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Problem Formulation}{4}{section.3}\protected@file@percent }
+\newlabel{sec:problem}{{3}{4}{Problem Formulation}{section.3}{}}
+\newlabel{sec:problem@cref}{{[section][3][]3}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}State Space}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Action Space}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}State Transitions}{4}{subsection.3.3}\protected@file@percent }
+\newlabel{eq:soc-update}{{1}{4}{State Transitions}{equation.1}{}}
+\newlabel{eq:soc-update@cref}{{[equation][1][]1}{[1][4][]4}{}{}{}}
+\citation{liu2018charging}
+\citation{koenker2001quantile}
+\citation{lakshminarayanan2017simple}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Reward and Cost Functions}{5}{subsection.3.4}\protected@file@percent }
+\newlabel{eq:reward}{{2}{5}{Reward and Cost Functions}{equation.2}{}}
+\newlabel{eq:reward@cref}{{[equation][2][]2}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Method: Safe Adaptive Ensemble Reinforcement Learning}{5}{section.4}\protected@file@percent }
+\newlabel{sec:method}{{4}{5}{Method: Safe Adaptive Ensemble Reinforcement Learning}{section.4}{}}
+\newlabel{sec:method@cref}{{[section][4][]4}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Predictive Ensemble}{5}{subsection.4.1}\protected@file@percent }
+\citation{yan2020mpc}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces High-level architecture of SAERL. The ensemble predictors operate on a sliding window of past states; their outputs are combined by an adaptive gate. The residual policy corrects an MPC baseline; the safety layer ensures all hard constraints are satisfied.}}{6}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:saerl-architecture}{{1}{6}{High-level architecture of SAERL. The ensemble predictors operate on a sliding window of past states; their outputs are combined by an adaptive gate. The residual policy corrects an MPC baseline; the safety layer ensures all hard constraints are satisfied}{figure.caption.1}{}}
+\newlabel{fig:saerl-architecture@cref}{{[figure][1][]1}{[1][5][]6}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Adaptive Gating}{6}{subsection.4.2}\protected@file@percent }
+\newlabel{eq:ensemble}{{3}{6}{Adaptive Gating}{equation.3}{}}
+\newlabel{eq:ensemble@cref}{{[equation][3][]3}{[1][6][]6}{}{}{}}
+\newlabel{eq:weights}{{5}{6}{Adaptive Gating}{equation.5}{}}
+\newlabel{eq:weights@cref}{{[equation][5][]5}{[1][6][]6}{}{}{}}
+\citation{tang2021model}
+\citation{schulman2017proximal}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Residual Policy and Safety Shield}{7}{subsection.4.3}\protected@file@percent }
+\newlabel{eq:shield}{{6}{7}{Residual Policy and Safety Shield}{equation.6}{}}
+\newlabel{eq:shield@cref}{{[equation][6][]6}{[1][7][]7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Training Procedure}{7}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Phase 1: Offline warm-start.}{7}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Phase 2: Online fine-tuning with PPO.}{7}{section*.3}\protected@file@percent }
+\newlabel{eq:ppo}{{7}{7}{Phase 2: Online fine-tuning with PPO}{equation.7}{}}
+\newlabel{eq:ppo@cref}{{[equation][7][]7}{[1][7][]7}{}{}{}}
+\citation{liu2018charging}
+\citation{saha2008battery}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces SAERL Training Loop}}{8}{algorithm.1}\protected@file@percent }
+\newlabel{alg:training}{{1}{8}{SAERL Training Loop}{algorithm.1}{}}
+\newlabel{alg:training@cref}{{[algorithm][1][]1}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Experimental Setup}{8}{section.5}\protected@file@percent }
+\newlabel{sec:experiments}{{5}{8}{Experimental Setup}{section.5}{}}
+\newlabel{sec:experiments@cref}{{[section][5][]5}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Battery and Pack Model}{8}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Datasets and Scenarios}{8}{subsection.5.2}\protected@file@percent }
+\citation{xing2014battery}
+\citation{severson2019data}
+\citation{yan2020mpc}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Baselines and Evaluation Protocol}{9}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Training and Hyperparameters}{9}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Results}{10}{section.6}\protected@file@percent }
+\newlabel{sec:results}{{6}{10}{Results}{section.6}{}}
+\newlabel{sec:results@cref}{{[section][6][]6}{[1][9][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Main Performance Comparison}{10}{subsection.6.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Main charging performance under the realistic protocol (sensor noise + SoC estimation error). Values are mean $\pm $ standard deviation over five seeds.}}{10}{table.caption.4}\protected@file@percent }
+\newlabel{tab:main-results}{{1}{10}{Main charging performance under the realistic protocol (sensor noise + SoC estimation error). Values are mean $\pm $ standard deviation over five seeds}{table.caption.4}{}}
+\newlabel{tab:main-results@cref}{{[table][1][]1}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Scenario-Level Analysis}{10}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces SAERL acceptance and safety summary by dataset family.}}{10}{table.caption.5}\protected@file@percent }
+\newlabel{tab:scenario-breakdown}{{2}{10}{SAERL acceptance and safety summary by dataset family}{table.caption.5}{}}
+\newlabel{tab:scenario-breakdown@cref}{{[table][2][]2}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Adaptive Gate Dynamics}{11}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Ablation Studies}{11}{subsection.6.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Ablation study on the NASA-6 scenario. Values are mean over five seeds.}}{11}{table.caption.6}\protected@file@percent }
+\newlabel{tab:ablation}{{3}{11}{Ablation study on the NASA-6 scenario. Values are mean over five seeds}{table.caption.6}{}}
+\newlabel{tab:ablation@cref}{{[table][3][]3}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Family-Specific Tuning}{11}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Inference Latency}{12}{subsection.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{12}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{7}{12}{Discussion}{section.7}{}}
+\newlabel{sec:discussion@cref}{{[section][7][]7}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Limitations and Future Work}{12}{section.8}\protected@file@percent }
+\newlabel{sec:limitations}{{8}{12}{Limitations and Future Work}{section.8}{}}
+\newlabel{sec:limitations@cref}{{[section][8][]8}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Chemistry and aging generalization.}{12}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Long-term degradation.}{13}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Pack-level transfer.}{13}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Computational overhead.}{13}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{13}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{9}{13}{Conclusion}{section.9}{}}
+\newlabel{sec:conclusion@cref}{{[section][9][]9}{[1][13][]13}{}{}{}}
+\bibstyle{unsrtnat}
+\bibcite{hu2020advanced}{{1}{}{{}}{{}}}
+\bibcite{tomaszewska2019lithium}{{2}{}{{}}{{}}}
+\bibcite{liu2018charging}{{3}{}{{}}{{}}}
+\bibcite{zou2016multi}{{4}{}{{}}{{}}}
+\bibcite{liu2019brief}{{5}{}{{}}{{}}}
+\bibcite{waldmann2014optimization}{{6}{}{{}}{{}}}
+\bibcite{beh2019pulse}{{7}{}{{}}{{}}}
+\bibcite{yan2020mpc}{{8}{}{{}}{{}}}
+\bibcite{wu2020battery}{{9}{}{{}}{{}}}
+\bibcite{wei2021safe}{{10}{}{{}}{{}}}
+\bibcite{lakshminarayanan2017simple}{{11}{}{{}}{{}}}
+\bibcite{chua2018deep}{{12}{}{{}}{{}}}
+\bibcite{liu2019gaussian}{{13}{}{{}}{{}}}
+\bibcite{koenker2001quantile}{{14}{}{{}}{{}}}
+\bibcite{tang2021model}{{15}{}{{}}{{}}}
+\bibcite{schulman2017proximal}{{16}{}{{}}{{}}}
+\bibcite{saha2008battery}{{17}{}{{}}{{}}}
+\bibcite{xing2014battery}{{18}{}{{}}{{}}}
+\bibcite{severson2019data}{{19}{}{{}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Hyperparameters}{16}{appendix.A}\protected@file@percent }
+\newlabel{app:hyperparams}{{A}{16}{Hyperparameters}{appendix.A}{}}
+\newlabel{app:hyperparams@cref}{{[section][1][]A}{[1][16][]16}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Key hyperparameters used in training SAERL.}}{16}{table.caption.17}\protected@file@percent }
+\newlabel{tab:hyperparams}{{4}{16}{Key hyperparameters used in training SAERL}{table.caption.17}{}}
+\newlabel{tab:hyperparams@cref}{{[table][4][]4}{[1][16][]16}{}{}{}}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\@writefile{toc}{\contentsline {section}{\numberline {B}Additional Results}{17}{appendix.B}\protected@file@percent }
+\newlabel{app:additional}{{B}{17}{Additional Results}{appendix.B}{}}
+\newlabel{app:additional@cref}{{[section][2][]B}{[1][16][]17}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Seed Variance}{17}{subsection.B.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Per-Cell Performance}{17}{subsection.B.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.3}Computational Overhead Breakdown}{17}{subsection.B.3}\protected@file@percent }
+\gdef \@abspage@last{17}

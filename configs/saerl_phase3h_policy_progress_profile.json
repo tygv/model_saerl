@@ -1,0 +1,106 @@
+{
+  "defaults": {
+    "reward_soc_gain_weight": 28.0,
+    "reward_step_penalty": 0.008,
+    "saerl_score_soc_gain_weight": 250.0,
+    "saerl_score_time_weight": 1.9,
+    "saerl_min_safe_charge_fraction": 0.36,
+    "saerl_anti_stall_soc_gap": 0.18,
+    "saerl_anti_stall_duration_s": 18.0,
+    "reward_acceptance_progress_weight": 20.0,
+    "reward_acceptance_terminal_weight": 42.0,
+    "reward_acceptance_success_bonus": 8.0,
+    "reward_acceptance_time_slack": 1.05,
+    "reward_acceptance_soc_margin": 0.02,
+    "reward_acceptance_start_fraction": 0.16,
+    "reward_acceptance_final_soc_progress_mult": 1.55,
+    "reward_acceptance_final_soc_terminal_mult": 2.15,
+    "reward_acceptance_final_soc_success_bonus_mult": 1.35
+  },
+  "families": {
+    "calce": {
+      "reward_soc_gain_weight": 36.0,
+      "saerl_score_soc_gain_weight": 390.0,
+      "saerl_score_time_weight": 2.9,
+      "saerl_min_safe_charge_fraction": 0.64,
+      "saerl_anti_stall_soc_gap": 0.1,
+      "saerl_anti_stall_duration_s": 8.0,
+      "reward_acceptance_progress_weight": 28.0,
+      "reward_acceptance_terminal_weight": 64.0,
+      "reward_acceptance_success_bonus": 11.0,
+      "reward_acceptance_final_soc_progress_mult": 1.8,
+      "reward_acceptance_final_soc_terminal_mult": 2.5,
+      "reward_acceptance_final_soc_success_bonus_mult": 1.5
+    },
+    "matr": {
+      "reward_soc_gain_weight": 34.0,
+      "saerl_score_soc_gain_weight": 360.0,
+      "saerl_score_time_weight": 2.7,
+      "saerl_min_safe_charge_fraction": 0.54,
+      "saerl_anti_stall_soc_gap": 0.11,
+      "saerl_anti_stall_duration_s": 10.0,
+      "reward_acceptance_progress_weight": 25.0,
+      "reward_acceptance_terminal_weight": 56.0,
+      "reward_acceptance_success_bonus": 10.0,
+      "reward_acceptance_final_soc_progress_mult": 1.7,
+      "reward_acceptance_final_soc_terminal_mult": 2.35,
+      "reward_acceptance_final_soc_success_bonus_mult": 1.4
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "reward_soc_gain_weight": 40.0,
+        "saerl_score_soc_gain_weight": 430.0,
+        "saerl_score_time_weight": 3.15,
+        "saerl_score_degradation_weight": 4.0,
+        "saerl_min_safe_charge_fraction": 0.72,
+        "saerl_anti_stall_soc_gap": 0.085,
+        "saerl_anti_stall_duration_s": 7.0,
+        "saerl_anti_stall_risk_scale": 7.5,
+        "reward_acceptance_progress_weight": 34.0,
+        "reward_acceptance_terminal_weight": 74.0,
+        "reward_acceptance_final_soc_progress_mult": 2.05,
+        "reward_acceptance_final_soc_terminal_mult": 2.75,
+        "reward_acceptance_final_soc_success_bonus_mult": 1.65
+      },
+      "safe": {
+        "reward_acceptance_final_soc_progress_mult": 1.75,
+        "reward_acceptance_final_soc_terminal_mult": 2.35,
+        "reward_acceptance_final_soc_success_bonus_mult": 1.45
+      },
+      "long_life": {
+        "reward_acceptance_final_soc_progress_mult": 1.65,
+        "reward_acceptance_final_soc_terminal_mult": 2.25,
+        "reward_acceptance_final_soc_success_bonus_mult": 1.4
+      }
+    },
+    "matr": {
+      "fastest": {
+        "reward_soc_gain_weight": 38.0,
+        "saerl_score_soc_gain_weight": 405.0,
+        "saerl_score_time_weight": 3.0,
+        "saerl_score_degradation_weight": 5.0,
+        "saerl_min_safe_charge_fraction": 0.62,
+        "saerl_anti_stall_soc_gap": 0.095,
+        "saerl_anti_stall_duration_s": 8.0,
+        "saerl_anti_stall_risk_scale": 7.5,
+        "reward_acceptance_progress_weight": 30.0,
+        "reward_acceptance_terminal_weight": 66.0,
+        "reward_acceptance_final_soc_progress_mult": 1.95,
+        "reward_acceptance_final_soc_terminal_mult": 2.65,
+        "reward_acceptance_final_soc_success_bonus_mult": 1.55
+      },
+      "safe": {
+        "reward_acceptance_final_soc_progress_mult": 1.65,
+        "reward_acceptance_final_soc_terminal_mult": 2.25,
+        "reward_acceptance_final_soc_success_bonus_mult": 1.35
+      },
+      "long_life": {
+        "reward_acceptance_final_soc_progress_mult": 1.55,
+        "reward_acceptance_final_soc_terminal_mult": 2.1,
+        "reward_acceptance_final_soc_success_bonus_mult": 1.3
+      }
+    }
+  }
+}

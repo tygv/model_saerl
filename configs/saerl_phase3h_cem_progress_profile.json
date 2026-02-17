@@ -1,0 +1,186 @@
+{
+  "global": {
+    "horizon": 5,
+    "iterations": 3,
+    "population": 52,
+    "elite_frac": 0.2,
+    "soc_gap_weight": 165.0,
+    "voltage_weight": 72.0,
+    "temp_weight": 44.0,
+    "imbalance_weight": 0.006,
+    "current_weight": 0.007,
+    "q_loss_weight": 15.0,
+    "safety_weight": 700.0,
+    "hard_violation_weight": 1800.0,
+    "progress_bonus_weight": 24.0,
+    "current_floor_fraction": 0.24,
+    "current_floor_penalty_weight": 8.0,
+    "final_soc_gain_soc_gap_mult": 1.0,
+    "final_soc_gain_progress_bonus_mult": 1.0,
+    "final_soc_gain_current_floor_fraction_add": 0.0,
+    "final_soc_gain_current_floor_penalty_mult": 1.0,
+    "final_soc_gain_horizon_add": 0.0,
+    "final_soc_gain_min_residual": 0.0,
+    "final_soc_gain_label_blend": 0.0,
+    "final_soc_gain_floor_fraction": 0.0,
+    "final_soc_gain_soc_gap_threshold": 0.08,
+    "final_soc_gain_low_risk_threshold": 0.52,
+    "final_soc_gain_min_residual_low_risk_boost": 0.08,
+    "final_soc_gain_label_blend_low_risk_boost": 0.2,
+    "final_soc_gain_floor_fraction_low_risk_boost": 0.08
+  },
+  "objectives": {
+    "fastest": {
+      "progress_bonus_weight": 40.0,
+      "current_floor_fraction": 0.34,
+      "current_floor_penalty_weight": 12.0,
+      "q_loss_weight": 10.0
+    },
+    "safe": {
+      "progress_bonus_weight": 18.0,
+      "temp_weight": 64.0,
+      "voltage_weight": 92.0,
+      "safety_weight": 920.0,
+      "current_floor_fraction": 0.2
+    },
+    "long_life": {
+      "progress_bonus_weight": 16.0,
+      "q_loss_weight": 24.0,
+      "current_weight": 0.012,
+      "temp_weight": 58.0,
+      "current_floor_fraction": 0.18
+    }
+  },
+  "families": {
+    "calce": {
+      "horizon": 6,
+      "iterations": 4,
+      "population": 64,
+      "soc_gap_weight": 198.0,
+      "progress_bonus_weight": 46.0,
+      "current_floor_fraction": 0.46,
+      "current_floor_penalty_weight": 16.0,
+      "q_loss_weight": 13.0,
+      "final_soc_gain_soc_gap_mult": 1.5,
+      "final_soc_gain_progress_bonus_mult": 1.7,
+      "final_soc_gain_current_floor_fraction_add": 0.14,
+      "final_soc_gain_current_floor_penalty_mult": 1.55,
+      "final_soc_gain_horizon_add": 2.0,
+      "final_soc_gain_min_residual": 0.1,
+      "final_soc_gain_label_blend": 0.55,
+      "final_soc_gain_floor_fraction": 0.66,
+      "final_soc_gain_soc_gap_threshold": 0.07,
+      "final_soc_gain_low_risk_threshold": 0.62,
+      "final_soc_gain_min_residual_low_risk_boost": 0.16,
+      "final_soc_gain_label_blend_low_risk_boost": 0.24,
+      "final_soc_gain_floor_fraction_low_risk_boost": 0.12
+    },
+    "matr": {
+      "horizon": 5,
+      "iterations": 4,
+      "population": 60,
+      "soc_gap_weight": 185.0,
+      "progress_bonus_weight": 40.0,
+      "current_floor_fraction": 0.36,
+      "current_floor_penalty_weight": 13.0,
+      "q_loss_weight": 14.0,
+      "final_soc_gain_soc_gap_mult": 1.35,
+      "final_soc_gain_progress_bonus_mult": 1.5,
+      "final_soc_gain_current_floor_fraction_add": 0.11,
+      "final_soc_gain_current_floor_penalty_mult": 1.4,
+      "final_soc_gain_horizon_add": 2.0,
+      "final_soc_gain_min_residual": 0.08,
+      "final_soc_gain_label_blend": 0.48,
+      "final_soc_gain_floor_fraction": 0.6,
+      "final_soc_gain_soc_gap_threshold": 0.07,
+      "final_soc_gain_low_risk_threshold": 0.58,
+      "final_soc_gain_min_residual_low_risk_boost": 0.12,
+      "final_soc_gain_label_blend_low_risk_boost": 0.2,
+      "final_soc_gain_floor_fraction_low_risk_boost": 0.1
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "q_loss_weight": 5.0,
+        "progress_bonus_weight": 52.0,
+        "final_soc_gain_soc_gap_mult": 1.75,
+        "final_soc_gain_progress_bonus_mult": 2.1,
+        "final_soc_gain_current_floor_fraction_add": 0.2,
+        "final_soc_gain_current_floor_penalty_mult": 1.7,
+        "final_soc_gain_horizon_add": 3.0,
+        "final_soc_gain_min_residual": 0.14,
+        "final_soc_gain_label_blend": 0.7,
+        "final_soc_gain_floor_fraction": 0.74,
+        "final_soc_gain_soc_gap_threshold": 0.06,
+        "final_soc_gain_low_risk_threshold": 0.68,
+        "final_soc_gain_min_residual_low_risk_boost": 0.2,
+        "final_soc_gain_label_blend_low_risk_boost": 0.28,
+        "final_soc_gain_floor_fraction_low_risk_boost": 0.14
+      },
+      "safe": {
+        "final_soc_gain_soc_gap_mult": 1.45,
+        "final_soc_gain_progress_bonus_mult": 1.7,
+        "final_soc_gain_current_floor_fraction_add": 0.14,
+        "final_soc_gain_current_floor_penalty_mult": 1.5,
+        "final_soc_gain_horizon_add": 2.0,
+        "final_soc_gain_min_residual": 0.11,
+        "final_soc_gain_label_blend": 0.56,
+        "final_soc_gain_floor_fraction": 0.68,
+        "final_soc_gain_soc_gap_threshold": 0.07
+      },
+      "long_life": {
+        "final_soc_gain_soc_gap_mult": 1.4,
+        "final_soc_gain_progress_bonus_mult": 1.6,
+        "final_soc_gain_current_floor_fraction_add": 0.12,
+        "final_soc_gain_current_floor_penalty_mult": 1.45,
+        "final_soc_gain_horizon_add": 2.0,
+        "final_soc_gain_min_residual": 0.1,
+        "final_soc_gain_label_blend": 0.52,
+        "final_soc_gain_floor_fraction": 0.66,
+        "final_soc_gain_soc_gap_threshold": 0.07
+      }
+    },
+    "matr": {
+      "fastest": {
+        "q_loss_weight": 6.0,
+        "progress_bonus_weight": 46.0,
+        "final_soc_gain_soc_gap_mult": 1.6,
+        "final_soc_gain_progress_bonus_mult": 1.9,
+        "final_soc_gain_current_floor_fraction_add": 0.16,
+        "final_soc_gain_current_floor_penalty_mult": 1.55,
+        "final_soc_gain_horizon_add": 3.0,
+        "final_soc_gain_min_residual": 0.12,
+        "final_soc_gain_label_blend": 0.62,
+        "final_soc_gain_floor_fraction": 0.7,
+        "final_soc_gain_soc_gap_threshold": 0.06,
+        "final_soc_gain_low_risk_threshold": 0.64,
+        "final_soc_gain_min_residual_low_risk_boost": 0.16,
+        "final_soc_gain_label_blend_low_risk_boost": 0.24,
+        "final_soc_gain_floor_fraction_low_risk_boost": 0.12
+      },
+      "safe": {
+        "final_soc_gain_soc_gap_mult": 1.35,
+        "final_soc_gain_progress_bonus_mult": 1.55,
+        "final_soc_gain_current_floor_fraction_add": 0.12,
+        "final_soc_gain_current_floor_penalty_mult": 1.4,
+        "final_soc_gain_horizon_add": 2.0,
+        "final_soc_gain_min_residual": 0.09,
+        "final_soc_gain_label_blend": 0.48,
+        "final_soc_gain_floor_fraction": 0.62,
+        "final_soc_gain_soc_gap_threshold": 0.07
+      },
+      "long_life": {
+        "final_soc_gain_soc_gap_mult": 1.3,
+        "final_soc_gain_progress_bonus_mult": 1.45,
+        "final_soc_gain_current_floor_fraction_add": 0.1,
+        "final_soc_gain_current_floor_penalty_mult": 1.35,
+        "final_soc_gain_horizon_add": 2.0,
+        "final_soc_gain_min_residual": 0.08,
+        "final_soc_gain_label_blend": 0.44,
+        "final_soc_gain_floor_fraction": 0.58,
+        "final_soc_gain_soc_gap_threshold": 0.07
+      }
+    }
+  }
+}

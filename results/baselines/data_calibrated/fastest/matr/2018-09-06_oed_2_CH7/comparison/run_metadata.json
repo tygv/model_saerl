@@ -26,7 +26,7 @@
     "standardized_root": "data/standardized",
     "params_root": "data/standardized_params",
     "dataset_families": "nasa,calce,matr",
-    "max_files_per_dataset": 1,
+    "max_files_per_dataset": 3,
     "data_is_cell_level": true,
     "include_cell_figures": false
   },

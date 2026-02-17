@@ -1,0 +1,111 @@
+{
+  "defaults": {
+    "reward_soc_gain_weight": 26.0,
+    "reward_step_penalty": 0.008,
+    "saerl_score_soc_gain_weight": 220.0,
+    "saerl_score_time_weight": 1.75,
+    "saerl_min_safe_charge_fraction": 0.34,
+    "saerl_anti_stall_soc_gap": 0.17,
+    "saerl_anti_stall_duration_s": 20.0,
+    "reward_acceptance_progress_weight": 16.0,
+    "reward_acceptance_terminal_weight": 34.0,
+    "reward_acceptance_success_bonus": 6.0,
+    "reward_acceptance_time_slack": 1.05,
+    "reward_acceptance_soc_margin": 0.02,
+    "reward_acceptance_start_fraction": 0.18
+  },
+  "families": {
+    "calce": {
+      "reward_soc_gain_weight": 34.0,
+      "saerl_score_soc_gain_weight": 360.0,
+      "saerl_score_time_weight": 2.80,
+      "saerl_min_safe_charge_fraction": 0.62,
+      "saerl_anti_stall_soc_gap": 0.11,
+      "saerl_anti_stall_duration_s": 10.0,
+      "reward_acceptance_progress_weight": 26.0,
+      "reward_acceptance_terminal_weight": 56.0,
+      "reward_acceptance_success_bonus": 10.0
+    },
+    "matr": {
+      "reward_soc_gain_weight": 32.0,
+      "saerl_score_soc_gain_weight": 340.0,
+      "saerl_score_time_weight": 2.60,
+      "saerl_min_safe_charge_fraction": 0.52,
+      "saerl_anti_stall_soc_gap": 0.12,
+      "saerl_anti_stall_duration_s": 12.0,
+      "reward_acceptance_progress_weight": 24.0,
+      "reward_acceptance_terminal_weight": 52.0,
+      "reward_acceptance_success_bonus": 9.0
+    }
+  },
+  "family_objectives": {
+    "calce": {
+      "fastest": {
+        "reward_soc_gain_weight": 38.0,
+        "saerl_score_soc_gain_weight": 410.0,
+        "saerl_score_time_weight": 3.10,
+        "saerl_score_degradation_weight": 4.0,
+        "saerl_min_safe_charge_fraction": 0.70,
+        "saerl_anti_stall_soc_gap": 0.09,
+        "saerl_anti_stall_duration_s": 8.0,
+        "saerl_anti_stall_risk_scale": 8.0,
+        "reward_acceptance_progress_weight": 30.0,
+        "reward_acceptance_terminal_weight": 66.0
+      },
+      "safe": {
+        "reward_soc_gain_weight": 33.0,
+        "saerl_score_soc_gain_weight": 330.0,
+        "saerl_score_time_weight": 2.40,
+        "saerl_min_safe_charge_fraction": 0.58,
+        "saerl_anti_stall_soc_gap": 0.11,
+        "saerl_anti_stall_duration_s": 10.0,
+        "reward_acceptance_progress_weight": 24.0,
+        "reward_acceptance_terminal_weight": 54.0
+      },
+      "long_life": {
+        "reward_soc_gain_weight": 31.0,
+        "saerl_score_soc_gain_weight": 320.0,
+        "saerl_score_time_weight": 2.30,
+        "saerl_min_safe_charge_fraction": 0.56,
+        "saerl_anti_stall_soc_gap": 0.12,
+        "saerl_anti_stall_duration_s": 11.0,
+        "reward_acceptance_progress_weight": 22.0,
+        "reward_acceptance_terminal_weight": 50.0
+      }
+    },
+    "matr": {
+      "fastest": {
+        "reward_soc_gain_weight": 36.0,
+        "saerl_score_soc_gain_weight": 390.0,
+        "saerl_score_time_weight": 2.95,
+        "saerl_score_degradation_weight": 5.0,
+        "saerl_min_safe_charge_fraction": 0.60,
+        "saerl_anti_stall_soc_gap": 0.10,
+        "saerl_anti_stall_duration_s": 9.0,
+        "saerl_anti_stall_risk_scale": 8.0,
+        "reward_acceptance_progress_weight": 28.0,
+        "reward_acceptance_terminal_weight": 62.0
+      },
+      "safe": {
+        "reward_soc_gain_weight": 31.0,
+        "saerl_score_soc_gain_weight": 310.0,
+        "saerl_score_time_weight": 2.30,
+        "saerl_min_safe_charge_fraction": 0.50,
+        "saerl_anti_stall_soc_gap": 0.12,
+        "saerl_anti_stall_duration_s": 11.0,
+        "reward_acceptance_progress_weight": 22.0,
+        "reward_acceptance_terminal_weight": 48.0
+      },
+      "long_life": {
+        "reward_soc_gain_weight": 30.0,
+        "saerl_score_soc_gain_weight": 300.0,
+        "saerl_score_time_weight": 2.20,
+        "saerl_min_safe_charge_fraction": 0.48,
+        "saerl_anti_stall_soc_gap": 0.13,
+        "saerl_anti_stall_duration_s": 12.0,
+        "reward_acceptance_progress_weight": 21.0,
+        "reward_acceptance_terminal_weight": 46.0
+      }
+    }
+  }
+}

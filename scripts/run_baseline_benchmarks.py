@@ -119,6 +119,10 @@ class BenchmarkConfig:
     max_files_per_dataset: int = 1
     data_is_cell_level: bool = True
     include_cell_figures: bool = False
+    adaptive_horizon: bool = True
+    min_episode_minutes: float = 120.0
+    feasible_time_slack: float = 1.35
+    max_steps_cap: int = 5000
 
 
 class CCCVController:
@@ -917,6 +921,52 @@ def collect_data_calibrated_scenarios(run_config: BenchmarkConfig) -> List[Dict[
     return scenarios
 
 
+def recommend_episode_max_steps(
+    dt_s: float,
+    base_max_steps: int,
+    initial_soc: float,
+    target_soc: float,
+    capacity_ah: float,
+    max_charge_current_a: float,
+    min_episode_minutes: float,
+    feasible_time_slack: float,
+    max_steps_cap: int,
+) -> Tuple[int, Dict[str, float]]:
+    base_steps = int(max(1, base_max_steps))
+    dt_s = float(max(1e-6, dt_s))
+    base_horizon_s = float(base_steps * dt_s)
+    capacity_ah = float(max(1e-6, capacity_ah))
+    soc_gap = float(max(0.0, target_soc - initial_soc))
+    max_current_a = float(max(1e-6, max_charge_current_a))
+
+    ideal_cc_time_to_target_s = float((soc_gap * capacity_ah * 3600.0) / max_current_a)
+    min_horizon_s = float(max(0.0, min_episode_minutes) * 60.0)
+    feasible_horizon_s = float(max(0.0, feasible_time_slack) * ideal_cc_time_to_target_s)
+    recommended_horizon_s = float(max(base_horizon_s, min_horizon_s, feasible_horizon_s))
+
+    recommended_steps = int(max(base_steps, int(np.ceil(recommended_horizon_s / dt_s))))
+    if int(max_steps_cap) > 0:
+        recommended_steps = int(min(recommended_steps, int(max_steps_cap)))
+        recommended_horizon_s = float(recommended_steps * dt_s)
+
+    required_current_for_base_horizon_a = float(
+        (soc_gap * capacity_ah * 3600.0) / max(base_horizon_s, 1e-6)
+    )
+    feasibility_ratio = float(max_current_a / max(required_current_for_base_horizon_a, 1e-6))
+
+    return recommended_steps, {
+        "dt_s": dt_s,
+        "base_max_steps": float(base_steps),
+        "effective_max_steps": float(recommended_steps),
+        "base_horizon_s": base_horizon_s,
+        "effective_horizon_s": recommended_horizon_s,
+        "ideal_cc_time_to_target_s": ideal_cc_time_to_target_s,
+        "required_current_for_base_horizon_a": required_current_for_base_horizon_a,
+        "configured_max_charge_current_a": max_current_a,
+        "current_feasibility_ratio_vs_base_horizon": feasibility_ratio,
+    }
+
+
 def execute_benchmark_setting(
     objective_key: str,
     objective,
@@ -965,11 +1015,37 @@ def execute_benchmark_setting(
 
     all_results: Dict[str, pd.DataFrame] = {}
     all_metrics: Dict[str, Dict] = {}
+    capacity_ah = float(pack_config.get_total_capacity())
+    if run_config.adaptive_horizon:
+        effective_max_steps, horizon_info = recommend_episode_max_steps(
+            dt_s=dt_s,
+            base_max_steps=run_config.max_steps,
+            initial_soc=initial_soc,
+            target_soc=run_config.target_soc,
+            capacity_ah=capacity_ah,
+            max_charge_current_a=max_charge_current_a,
+            min_episode_minutes=run_config.min_episode_minutes,
+            feasible_time_slack=run_config.feasible_time_slack,
+            max_steps_cap=run_config.max_steps_cap,
+        )
+    else:
+        effective_max_steps = int(run_config.max_steps)
+        horizon_info = {
+            "dt_s": float(max(1e-6, dt_s)),
+            "base_max_steps": float(run_config.max_steps),
+            "effective_max_steps": float(run_config.max_steps),
+            "base_horizon_s": float(run_config.max_steps * dt_s),
+            "effective_horizon_s": float(run_config.max_steps * dt_s),
+            "ideal_cc_time_to_target_s": float("nan"),
+            "required_current_for_base_horizon_a": float("nan"),
+            "configured_max_charge_current_a": float(max_charge_current_a),
+            "current_feasibility_ratio_vs_base_horizon": float("nan"),
+        }
 
     for name, controller in controllers.items():
         env = HAMBRLPackEnvironment(
             pack_config=pack_config,
-            max_steps=run_config.max_steps,
+            max_steps=effective_max_steps,
             target_soc=run_config.target_soc,
             ambient_temp=ambient_temp_c,
             max_charge_current_a=max_charge_current_a,
@@ -1008,6 +1084,8 @@ def execute_benchmark_setting(
                 "config": asdict(run_config),
                 "scenario": scenario_metadata or {},
                 "metrics": all_metrics[name],
+                "effective_max_steps": int(effective_max_steps),
+                "horizon_info": horizon_info,
             },
         )
         plot_baseline_timeseries(
@@ -1046,6 +1124,8 @@ def execute_benchmark_setting(
             "cv_voltage_v": cv_voltage_v,
             "max_charge_current_a": max_charge_current_a,
             "dt_s": dt_s,
+            "effective_max_steps": int(effective_max_steps),
+            "horizon_info": horizon_info,
         },
     )
 
@@ -1080,6 +1160,35 @@ def parse_args() -> BenchmarkConfig:
     )
     parser.add_argument("--output-root", type=str, default="results/baselines")
     parser.add_argument("--max-steps", type=int, default=1800)
+    parser.add_argument(
+        "--disable-adaptive-horizon",
+        action="store_true",
+        help=(
+            "Disable horizon scaling based on dt/current feasibility. "
+            "By default adaptive horizon is enabled for fair cross-chemistry timing."
+        ),
+    )
+    parser.add_argument(
+        "--min-episode-minutes",
+        type=float,
+        default=120.0,
+        help="Minimum physical episode duration used by adaptive horizon scaling.",
+    )
+    parser.add_argument(
+        "--feasible-time-slack",
+        type=float,
+        default=1.35,
+        help=(
+            "Multiplier on ideal CC time-to-target when computing adaptive episode horizon "
+            "(>1 adds taper/degradation slack)."
+        ),
+    )
+    parser.add_argument(
+        "--max-steps-cap",
+        type=int,
+        default=5000,
+        help="Upper cap on adaptive max steps per scenario (<=0 disables cap).",
+    )
     parser.add_argument("--initial-soc", type=float, default=0.2)
     parser.add_argument("--target-soc", type=float, default=0.8)
     parser.add_argument("--ambient-temp-c", type=float, default=25.0)
@@ -1150,6 +1259,10 @@ def parse_args() -> BenchmarkConfig:
         max_files_per_dataset=args.max_files_per_dataset,
         data_is_cell_level=not args.data_is_pack_level,
         include_cell_figures=args.include_cell_figures,
+        adaptive_horizon=not bool(args.disable_adaptive_horizon),
+        min_episode_minutes=float(args.min_episode_minutes),
+        feasible_time_slack=float(args.feasible_time_slack),
+        max_steps_cap=int(args.max_steps_cap),
     )
 
 

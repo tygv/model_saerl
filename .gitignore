@@ -3,6 +3,17 @@
 !/data/**/
 !/data/**/.gitkeep
 
+# Ignore generated experiment outputs/checkpoints
+/results/**
+!/results/**/
+!/results/**/.gitkeep
+/models/**
+!/models/**/
+!/models/**/.gitkeep
+
+# Ignore local tooling/state folders
+/.qodo/
+
 # Ignore Python bytecode caches
 __pycache__/
 *.py[cod]
