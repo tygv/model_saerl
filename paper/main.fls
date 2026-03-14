@@ -263,32 +263,106 @@ INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-mathit.enc
 INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-mathsy.enc
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr12.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmbx12.tfm
-INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmbx12.tfm
-INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmri10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\rm-lmr10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\lmmi10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\lmsy10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msam10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\amsfonts\symbols\msbm10.tfm
-INPUT C:\Program Files\MiKTeX\tex\latex\lm\ts1lmr.fd
-INPUT C:\Program Files\MiKTeX\tex\latex\lm\ts1lmr.fd
-INPUT C:\Program Files\MiKTeX\tex\latex\lm\ts1lmr.fd
-INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ts1-lmr10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmbx12.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr8.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr6.tfm
+INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-mathex.enc
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\rm-lmbx10.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\rm-lmbx8.tfm
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\rm-lmbx6.tfm
-INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-ts1.enc
-INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-mathex.enc
+INPUT .\image\SAERL architecture.png
+INPUT .\image\SAERL architecture.png
+INPUT .\image\SAERL architecture.png
+INPUT .\image\SAERL architecture.png
+INPUT .\image\SAERL architecture.png
+INPUT .\image\SAERL architecture.png
+INPUT .\image\SAERL architecture.png
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmr9.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmcsc10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmcsc10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmcsc10.tfm
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig2_overall_pass_fail_counts.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig_controller_pareto_time_vs_safety.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
+INPUT .\figures\results_section\fig3_criterion_pass_fail_percent.png
 INPUT C:\Program Files\MiKTeX\tex\latex\lm\t1lmtt.fd
 INPUT C:\Program Files\MiKTeX\tex\latex\lm\t1lmtt.fd
 INPUT C:\Program Files\MiKTeX\tex\latex\lm\t1lmtt.fd
 INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmtt10.tfm
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT .\figures\results_section\fig4_grouped_pass_counts_family_objective.png
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmtk10.tfm
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig5_training_gap.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig6_ablation_tradeoff.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig7_gate_uncertainty_dynamics.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig8_latency_breakdown.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
+INPUT .\figures\results_section\fig9_case_study_matr_fastest_trajectories.png
 INPUT .\main.bbl
 INPUT .\main.bbl
 INPUT main.bbl
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ec-lmri10.tfm
+INPUT C:\Program Files\MiKTeX\tex\latex\lm\ts1lmr.fd
+INPUT C:\Program Files\MiKTeX\tex\latex\lm\ts1lmr.fd
+INPUT C:\Program Files\MiKTeX\tex\latex\lm\ts1lmr.fd
+INPUT C:\Program Files\MiKTeX\fonts\tfm\public\lm\ts1-lmr10.tfm
+INPUT C:\Program Files\MiKTeX\fonts\enc\dvips\lm\lm-ts1.enc
 INPUT main.aux
 INPUT .\main.out
 INPUT .\main.out
@@ -296,10 +370,14 @@ INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx12.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmbx12.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmcsc10.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmcsc10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmex10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmex10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmmi10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmmi10.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmmi6.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmmi6.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmmi8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmmi8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmr10.pfb
@@ -320,9 +398,15 @@ INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmri10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmri10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmsy10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmsy10.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmsy6.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmsy6.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmsy8.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmsy8.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmtk10.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmtk10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmtt10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\lm\lmtt10.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\symbols\msam10.pfb
+INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\symbols\msam10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\symbols\msbm10.pfb
 INPUT C:\Program Files\MiKTeX\fonts\type1\public\amsfonts\symbols\msbm10.pfb

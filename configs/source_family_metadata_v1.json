@@ -1,0 +1,35 @@
+{
+  "version": "source_family_metadata_v1",
+  "families": {
+    "nasa": {
+      "family_id": 0,
+      "chemistry_hint": "liion_unknown",
+      "form_factor_hint": "cylindrical_18650",
+      "nominal_capacity_ah": 2.0,
+      "test_regime": "aging_eis",
+      "supports_internal_resistance_column": false,
+      "supports_ac_impedance_column": false,
+      "supports_nasa_impedance_sidecar": true
+    },
+    "calce": {
+      "family_id": 1,
+      "chemistry_hint": "lco",
+      "form_factor_hint": "prismatic",
+      "nominal_capacity_ah": 1.1,
+      "test_regime": "cycle_cccv",
+      "supports_internal_resistance_column": true,
+      "supports_ac_impedance_column": true,
+      "supports_nasa_impedance_sidecar": false
+    },
+    "matr": {
+      "family_id": 2,
+      "chemistry_hint": "lfp",
+      "form_factor_hint": "cylindrical_18650",
+      "nominal_capacity_ah": 1.1,
+      "test_regime": "fast_charge",
+      "supports_internal_resistance_column": true,
+      "supports_ac_impedance_column": false,
+      "supports_nasa_impedance_sidecar": false
+    }
+  }
+}

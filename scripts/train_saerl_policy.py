@@ -29,13 +29,17 @@ from controllers.adaptive_ensemble_rl import (
     window_to_sequence,
 )
 from pack_experiments import build_default_objectives
-from scripts.run_baseline_benchmarks import MPCConfig, RolloutMPCController, count_safety_events, trim_pack_histories
+from scripts.run_baseline_benchmarks import RolloutMPCController, count_safety_events, trim_pack_histories
 from scripts.saerl_common import (
     apply_domain_randomization,
     build_setting_for_objective,
+    chemistry_aware_mpc_config,
+    get_context_columns,
     initial_state_from_env,
     load_data_calibrated_scenarios,
     make_env,
+    recommend_episode_max_steps,
+    scenario_context_array,
 )
 
 
@@ -51,6 +55,7 @@ class TrainPolicyConfig:
     standardized_root: str = "data/standardized"
     params_root: str = "data/standardized_params"
     dataset_families: str = "nasa,calce,matr"
+    exclude_dataset_cases: str = ""
     max_files_per_dataset: int = 3
     random_seed: int = 123
     offline_epochs: int = 20
@@ -64,6 +69,10 @@ class TrainPolicyConfig:
     entropy_coef: float = 1e-3
     online_rollout_episodes: int = 4
     online_max_steps: int = 220
+    adaptive_online_horizon: bool = True
+    min_episode_minutes: float = 120.0
+    feasible_time_slack: float = 1.35
+    max_steps_cap: int = 5000
     target_soc: float = 0.8
     n_series: int = 20
     n_parallel: int = 1
@@ -109,6 +118,10 @@ class TrainPolicyConfig:
     reward_acceptance_final_soc_success_bonus_mult: float = 1.0
     chemistry_mode: str = "global"
     chemistry_families: str = ""
+    saerl_mpc_anchor_mode: str = "family_specific"
+    context_feature_set: str = "none"
+    family_metadata_json: str = "configs/source_family_metadata_v1.json"
+    nasa_impedance_root: str = "data/standardized/nasa_impedance"
     init_actor_root: str = ""
     saerl_family_profile_json: str = ""
     objective_specific_heads: bool = True
@@ -134,6 +147,12 @@ def parse_args() -> TrainPolicyConfig:
     parser.add_argument("--standardized-root", type=str, default="data/standardized")
     parser.add_argument("--params-root", type=str, default="data/standardized_params")
     parser.add_argument("--dataset-families", type=str, default="nasa,calce,matr")
+    parser.add_argument(
+        "--exclude-dataset-cases",
+        type=str,
+        default="",
+        help="Optional comma list of family/case_id pairs to skip during scenario selection.",
+    )
     parser.add_argument("--max-files-per-dataset", type=int, default=3)
     parser.add_argument("--random-seed", type=int, default=123)
     parser.add_argument("--offline-epochs", type=int, default=20)
@@ -147,6 +166,35 @@ def parse_args() -> TrainPolicyConfig:
     parser.add_argument("--entropy-coef", type=float, default=1e-3)
     parser.add_argument("--online-rollout-episodes", type=int, default=4)
     parser.add_argument("--online-max-steps", type=int, default=220)
+    parser.add_argument(
+        "--disable-adaptive-online-horizon",
+        action="store_true",
+        help=(
+            "Disable horizon scaling based on dt/current feasibility for online SAERL training. "
+            "By default adaptive online horizon is enabled."
+        ),
+    )
+    parser.add_argument(
+        "--min-episode-minutes",
+        type=float,
+        default=120.0,
+        help="Minimum physical episode duration used by adaptive horizon scaling.",
+    )
+    parser.add_argument(
+        "--feasible-time-slack",
+        type=float,
+        default=1.35,
+        help=(
+            "Multiplier on ideal CC time-to-target when computing adaptive episode horizon "
+            "(>1 adds taper/degradation slack)."
+        ),
+    )
+    parser.add_argument(
+        "--max-steps-cap",
+        type=int,
+        default=5000,
+        help="Upper cap on adaptive max steps per scenario (<=0 disables cap).",
+    )
     parser.add_argument("--target-soc", type=float, default=0.8)
     parser.add_argument("--n-series", type=int, default=20)
     parser.add_argument("--n-parallel", type=int, default=1)
@@ -204,6 +252,32 @@ def parse_args() -> TrainPolicyConfig:
         help="Optional comma list of chemistry families (defaults to dataset families in CSV).",
     )
     parser.add_argument(
+        "--saerl-mpc-anchor-mode",
+        type=str,
+        default="family_specific",
+        choices=["global", "family_specific", "shared_plus_heads"],
+        help="Chemistry-aware MPC anchor mode used by SAERL residual training.",
+    )
+    parser.add_argument(
+        "--context-feature-set",
+        type=str,
+        default="none",
+        choices=["none", "source_v1"],
+        help="Optional static context feature set sourced from ctx_* columns.",
+    )
+    parser.add_argument(
+        "--family-metadata-json",
+        type=str,
+        default="configs/source_family_metadata_v1.json",
+        help="Family metadata JSON used to build source_v1 scenario context.",
+    )
+    parser.add_argument(
+        "--nasa-impedance-root",
+        type=str,
+        default="data/standardized/nasa_impedance",
+        help="Optional NASA impedance sidecar root used by source_v1 context.",
+    )
+    parser.add_argument(
         "--init-actor-root",
         type=str,
         default="",
@@ -253,6 +327,7 @@ def parse_args() -> TrainPolicyConfig:
         standardized_root=args.standardized_root,
         params_root=args.params_root,
         dataset_families=args.dataset_families,
+        exclude_dataset_cases=args.exclude_dataset_cases,
         max_files_per_dataset=args.max_files_per_dataset,
         random_seed=args.random_seed,
         offline_epochs=args.offline_epochs,
@@ -266,6 +341,10 @@ def parse_args() -> TrainPolicyConfig:
         entropy_coef=args.entropy_coef,
         online_rollout_episodes=args.online_rollout_episodes,
         online_max_steps=args.online_max_steps,
+        adaptive_online_horizon=not bool(args.disable_adaptive_online_horizon),
+        min_episode_minutes=float(args.min_episode_minutes),
+        feasible_time_slack=float(args.feasible_time_slack),
+        max_steps_cap=int(args.max_steps_cap),
         target_soc=args.target_soc,
         n_series=args.n_series,
         n_parallel=args.n_parallel,
@@ -311,6 +390,10 @@ def parse_args() -> TrainPolicyConfig:
         reward_acceptance_final_soc_success_bonus_mult=args.reward_acceptance_final_soc_success_bonus_mult,
         chemistry_mode=args.chemistry_mode,
         chemistry_families=args.chemistry_families,
+        saerl_mpc_anchor_mode=args.saerl_mpc_anchor_mode,
+        context_feature_set=args.context_feature_set,
+        family_metadata_json=args.family_metadata_json,
+        nasa_impedance_root=args.nasa_impedance_root,
         init_actor_root=args.init_actor_root,
         saerl_family_profile_json=args.saerl_family_profile_json,
         objective_specific_heads=bool(args.objective_specific_heads),
@@ -333,6 +416,13 @@ def parse_window_cols(columns: Sequence[str]) -> List[str]:
     cols = [c for c in columns if c.startswith("window_t") and "_f" in c]
     cols.sort()
     return cols
+
+
+def parse_context_cols(columns: Sequence[str]) -> List[str]:
+    cols_set = {str(c) for c in columns if str(c).startswith("ctx_")}
+    ordered = [c for c in get_context_columns("source_v1") if c in cols_set]
+    extras = sorted([c for c in cols_set if c not in set(ordered)])
+    return ordered + extras
 
 
 def split_csv_arg(value: str) -> List[str]:
@@ -557,11 +647,20 @@ def select_rows_by_split(df: pd.DataFrame, split_ids: Dict[str, List[str]], spli
     return df[df["episode_id"].astype(str).isin(ids)].copy()
 
 
-def build_actor_dataset(df: pd.DataFrame, window_cols: List[str], target_soc: float) -> Tuple[np.ndarray, np.ndarray]:
+def build_actor_dataset(
+    df: pd.DataFrame,
+    window_cols: List[str],
+    context_cols: List[str],
+    target_soc: float,
+) -> Tuple[np.ndarray, np.ndarray]:
     x_window = df[window_cols].to_numpy(dtype=np.float32)
     x_mpc = df["action_mpc"].to_numpy(dtype=np.float32).reshape(-1, 1)
     soc_gap = (target_soc - df["pack_soc"].to_numpy(dtype=np.float32)).reshape(-1, 1)
-    x = np.concatenate([x_window, x_mpc, soc_gap], axis=1).astype(np.float32)
+    if context_cols:
+        x_ctx = df[context_cols].to_numpy(dtype=np.float32)
+    else:
+        x_ctx = np.zeros((len(df), 0), dtype=np.float32)
+    x = np.concatenate([x_window, x_mpc, soc_gap, x_ctx], axis=1).astype(np.float32)
     y = np.clip(df["target_delta_action"].to_numpy(dtype=np.float32), -1.0, 1.0).reshape(-1, 1)
     return x, y
 
@@ -581,6 +680,8 @@ def evaluate_policy_short(
     scenario_tuples: List[Tuple[str, str, str]],
     setting_map: Dict[Tuple[str, str, str], Any],
     max_steps: int,
+    max_steps_map: Dict[Tuple[str, str, str], int] | None,
+    saerl_mpc_anchor_mode: str,
     target_soc: float,
     eval_score_soc_weight: float,
     eval_score_time_weight: float,
@@ -591,11 +692,19 @@ def evaluate_policy_short(
     scores: List[float] = []
     for tup in scenario_tuples[: min(3, len(scenario_tuples))]:
         setting = setting_map[tup]
-        env = make_env(setting=setting, max_steps=max_steps, target_soc=target_soc)
+        scenario_steps = int(max(1, max_steps))
+        if max_steps_map is not None:
+            scenario_steps = int(max(1, max_steps_map.get(tup, scenario_steps)))
+        env = make_env(setting=setting, max_steps=scenario_steps, target_soc=target_soc)
         env.reset(initial_soc=setting.initial_soc, temperature=setting.initial_temp_c)
         trim_pack_histories(env.pack)
+        objective_key, family, _ = tup
         mpc = RolloutMPCController(
-            config=MPCConfig(),
+            config=chemistry_aware_mpc_config(
+                family=family,
+                mode=saerl_mpc_anchor_mode,
+                objective_key=objective_key,
+            ),
             cv_voltage_v=setting.cv_voltage_v,
             max_charge_current_a=setting.max_charge_current_a,
             target_soc=target_soc,
@@ -607,6 +716,11 @@ def evaluate_policy_short(
             config=predictor.config,
         )
         shield_helper.reset()
+        ctx_vec = scenario_context_array(
+            setting.scenario,
+            context_feature_set=predictor.config.context_feature_set,
+            context_columns=predictor.config.context_columns,
+        )
         state = initial_state_from_env(env)
         state_window: Deque[Dict[str, Any]] = deque(maxlen=predictor.config.window_len)
         for _ in range(predictor.config.window_len):
@@ -614,14 +728,20 @@ def evaluate_policy_short(
         done = False
         step_idx = 0
         safety_total = 0
-        while not done and step_idx < max_steps:
+        while not done and step_idx < scenario_steps:
             mpc_action, _ = mpc.act(state, env)
             seq = window_to_sequence(
                 state_window=list(state_window),
                 window_len=predictor.config.window_len,
                 max_charge_current_a=setting.max_charge_current_a,
             )
-            delta, _ = actor.predict_delta(sequence=seq, mpc_action=mpc_action, target_soc=target_soc, stochastic=False)
+            delta, _ = actor.predict_delta(
+                sequence=seq,
+                mpc_action=mpc_action,
+                target_soc=target_soc,
+                context=ctx_vec,
+                stochastic=False,
+            )
             action = float(np.clip(float(mpc_action) + delta, -1.0, 1.0))
             if not isfinite_action(action):
                 action = float(mpc_action)
@@ -630,6 +750,7 @@ def evaluate_policy_short(
                 action=action,
                 max_charge_current_a=setting.max_charge_current_a,
                 cv_voltage_v=setting.cv_voltage_v,
+                context=ctx_vec,
             )
             action, _ = shield_helper.validate_and_shield_action(
                 state=state,
@@ -771,6 +892,7 @@ def calibrate_antistall_from_validation(
         n=min(len(val_df), max_rows),
         random_state=config.random_seed,
     ).copy()
+    context_cols = parse_context_cols(sample_df.columns.tolist())
     sample_df["soc_gap"] = float(config.target_soc) - sample_df["pack_soc"].astype(float)
     gap_threshold = float(
         max(
@@ -800,12 +922,18 @@ def calibrate_antistall_from_validation(
             window_len=predictor.config.window_len,
             max_charge_current_a=max_i,
         )
+        ctx_vec = (
+            row[context_cols].to_numpy(dtype=np.float32)
+            if context_cols
+            else np.zeros((0,), dtype=np.float32)
+        )
         action = float(np.clip(row.get("target_action", row.get("action_mpc", 0.0)), -1.0, 1.0))
         fused = predictor.predict_fused(
             state_window=states,
             action=action,
             max_charge_current_a=max_i,
             cv_voltage_v=cv_v,
+            context=ctx_vec,
         )
         raw_risk = float(fused.get("risk_score", 0.0))
         normalized_risk = float(max(0.0, raw_risk) / (max(0.0, raw_risk) + risk_scale))
@@ -851,6 +979,9 @@ def main() -> None:
     window_cols = parse_window_cols(df.columns.tolist())
     if not window_cols:
         raise SystemExit("No window_t* columns found.")
+    context_cols = parse_context_cols(df.columns.tolist())
+    if context_cols and config.context_feature_set == "none":
+        config.context_feature_set = "source_v1"
 
     with Path(config.split_manifest_json).open("r", encoding="utf-8") as handle:
         manifest = json.load(handle)
@@ -869,6 +1000,7 @@ def main() -> None:
         standardized_root=config.standardized_root,
         params_root=config.params_root,
         dataset_families=config.dataset_families,
+        exclude_dataset_cases=config.exclude_dataset_cases,
         max_files_per_dataset=config.max_files_per_dataset,
         n_series=config.n_series,
         n_parallel=config.n_parallel,
@@ -877,6 +1009,9 @@ def main() -> None:
         initial_soc=config.initial_soc,
         target_soc=config.target_soc,
         ambient_temp_c=config.ambient_temp_c,
+        context_feature_set=config.context_feature_set,
+        family_metadata_json=config.family_metadata_json,
+        nasa_impedance_root=config.nasa_impedance_root,
     )
     scenario_map: Dict[Tuple[str, str], Dict[str, Any]] = {
         (str(s["family"]), str(s["case_id"])): s for s in scenarios
@@ -994,28 +1129,51 @@ def main() -> None:
         fold_id = int(fold["fold_id"])
         train_df = select_rows_by_split(df=df, split_ids=fold["splits"], split_name="train")
         val_df = select_rows_by_split(df=df, split_ids=fold["splits"], split_name="val")
+        internal_test_df = select_rows_by_split(df=df, split_ids=fold["splits"], split_name="internal_test")
         if scope_family is not None:
             train_df = filter_family(train_df, family=scope_family)
             val_df = filter_family(val_df, family=scope_family)
-        if train_df.empty:
-            raise SystemExit(f"Fold {fold_id}: empty train split.")
-        if val_df.empty:
-            val_df = train_df.sample(n=min(len(train_df), 1000), random_state=config.random_seed)
+            internal_test_df = filter_family(internal_test_df, family=scope_family)
 
         if config.objective != "all":
             train_df = train_df[train_df["objective"].isin(objective_keys)].copy()
             val_df = val_df[val_df["objective"].isin(objective_keys)].copy()
-            if train_df.empty:
-                raise SystemExit(f"Fold {fold_id}: train split empty after objective filter.")
-            if val_df.empty:
-                val_df = train_df.sample(n=min(len(train_df), 1000), random_state=config.random_seed)
+            internal_test_df = internal_test_df[internal_test_df["objective"].isin(objective_keys)].copy()
 
-        x_train, y_train = build_actor_dataset(train_df, window_cols=window_cols, target_soc=config.target_soc)
-        x_val, y_val = build_actor_dataset(val_df, window_cols=window_cols, target_soc=config.target_soc)
+        if train_df.empty:
+            fallback_parts = [frame for frame in (val_df, internal_test_df) if not frame.empty]
+            if fallback_parts:
+                train_df = pd.concat(fallback_parts, axis=0, ignore_index=True).drop_duplicates().reset_index(drop=True)
+                print(
+                    f"Fold {fold_id}: promoted non-case rows into train split "
+                    f"(family={scope_family or 'all'}, objective={config.objective})."
+                )
+            else:
+                if config.objective != "all":
+                    raise SystemExit(f"Fold {fold_id}: train split empty after objective filter.")
+                raise SystemExit(f"Fold {fold_id}: empty train split.")
+        if val_df.empty:
+            val_df = train_df.sample(n=min(len(train_df), 1000), random_state=config.random_seed)
+
+        x_train, y_train = build_actor_dataset(
+            train_df,
+            window_cols=window_cols,
+            context_cols=context_cols,
+            target_soc=config.target_soc,
+        )
+        x_val, y_val = build_actor_dataset(
+            val_df,
+            window_cols=window_cols,
+            context_cols=context_cols,
+            target_soc=config.target_soc,
+        )
 
         actor = ResidualActorPolicy(
             input_dim=x_train.shape[1],
             delta_action_limit=SAERLConfig().delta_action_limit,
+            context_dim=len(context_cols),
+            context_feature_set=config.context_feature_set,
+            context_columns=context_cols,
             device=str(device),
         )
         init_actor_root = Path(config.init_actor_root) if str(config.init_actor_root).strip() else None
@@ -1156,17 +1314,31 @@ def main() -> None:
             }
         )
         setting_map: Dict[Tuple[str, str, str], Any] = {}
+        online_max_steps_map: Dict[Tuple[str, str, str], int] = {}
         for tup in set(train_tuples + val_tuples):
             objective_key, family, case = tup
             if objective_key not in objectives:
                 continue
             scenario = scenario_map[(family, case)]
-            setting_map[tup] = build_setting_for_objective(
+            setting = build_setting_for_objective(
                 run_config=run_config,
                 objective_key=objective_key,
                 objective=objectives[objective_key],
                 scenario=scenario,
             )
+            setting_map[tup] = setting
+            if config.adaptive_online_horizon:
+                scenario_steps, _ = recommend_episode_max_steps(
+                    setting=setting,
+                    base_max_steps=config.online_max_steps,
+                    target_soc=config.target_soc,
+                    min_episode_minutes=config.min_episode_minutes,
+                    feasible_time_slack=config.feasible_time_slack,
+                    max_steps_cap=config.max_steps_cap,
+                )
+            else:
+                scenario_steps = int(max(1, config.online_max_steps))
+            online_max_steps_map[tup] = int(max(1, scenario_steps))
 
         best_online_score = float("-inf")
         best_online_state = {k: v.detach().cpu().clone() for k, v in actor.model.state_dict().items()}
@@ -1189,16 +1361,26 @@ def main() -> None:
                 tup = train_tuples[int(rng.integers(0, len(train_tuples)))]
                 objective_key_ep, family_ep, case_ep = tup
                 setting = setting_map[tup]
-                env = make_env(setting=setting, max_steps=config.online_max_steps, target_soc=config.target_soc)
+                episode_max_steps = int(max(1, online_max_steps_map.get(tup, config.online_max_steps)))
+                env = make_env(setting=setting, max_steps=episode_max_steps, target_soc=config.target_soc)
                 env.reset(initial_soc=setting.initial_soc, temperature=setting.initial_temp_c)
                 trim_pack_histories(env.pack)
                 apply_domain_randomization(env=env, rng=rng)
                 acceptance_ref = baseline_refs.get(
                     (str(objective_key_ep).lower(), str(family_ep).lower(), str(case_ep))
                 )
+                ctx_vec = scenario_context_array(
+                    setting.scenario,
+                    context_feature_set=predictor.config.context_feature_set,
+                    context_columns=predictor.config.context_columns,
+                )
 
                 mpc = RolloutMPCController(
-                    config=MPCConfig(),
+                    config=chemistry_aware_mpc_config(
+                        family=family_ep,
+                        mode=config.saerl_mpc_anchor_mode,
+                        objective_key=objective_key_ep,
+                    ),
                     cv_voltage_v=setting.cv_voltage_v,
                     max_charge_current_a=setting.max_charge_current_a,
                     target_soc=config.target_soc,
@@ -1225,7 +1407,7 @@ def main() -> None:
 
                 done = False
                 step_idx = 0
-                while not done and step_idx < config.online_max_steps:
+                while not done and step_idx < episode_max_steps:
                     mpc_action, _ = mpc.act(state, env)
                     seq = window_to_sequence(
                         state_window=list(state_window),
@@ -1236,6 +1418,9 @@ def main() -> None:
                         sequence=seq,
                         mpc_action=float(mpc_action),
                         target_soc=config.target_soc,
+                        context=ctx_vec,
+                        context_dim=actor.context_dim,
+                        context_columns=actor.context_columns,
                     )
                     x_t = torch.from_numpy(actor_input).float().unsqueeze(0).to(device)
                     actor.model.eval()
@@ -1254,6 +1439,7 @@ def main() -> None:
                         action=action,
                         max_charge_current_a=setting.max_charge_current_a,
                         cv_voltage_v=setting.cv_voltage_v,
+                        context=ctx_vec,
                     )
                     action, _ = shield_helper.validate_and_shield_action(
                         state=state,
@@ -1309,7 +1495,7 @@ def main() -> None:
                             horizon_min = max(
                                 1e-6,
                                 acceptance_ref.horizon_time_min,
-                                float(config.online_max_steps * setting.dt_s / 60.0),
+                                float(episode_max_steps * setting.dt_s / 60.0),
                             )
                             if elapsed_min >= reward_acceptance_start_fraction * horizon_min:
                                 expected_soc = initial_soc_ep + (target_final_soc - initial_soc_ep) * min(
@@ -1323,6 +1509,7 @@ def main() -> None:
                         state_window=list(state_window),
                         action=action,
                         max_charge_current_a=setting.max_charge_current_a,
+                        context=ctx_vec,
                     )
                     y_true = np.array(
                         [
@@ -1345,6 +1532,7 @@ def main() -> None:
                         [
                             seq_last,
                             np.array([action], dtype=np.float32),
+                            ctx_vec.astype(np.float32),
                             np.array(unc, dtype=np.float32),
                             np.array(err, dtype=np.float32),
                         ],
@@ -1467,7 +1655,9 @@ def main() -> None:
                 predictor=predictor,
                 scenario_tuples=val_tuples if val_tuples else train_tuples,
                 setting_map=setting_map,
-                max_steps=min(config.online_max_steps, 140),
+                max_steps=config.online_max_steps,
+                max_steps_map=online_max_steps_map,
+                saerl_mpc_anchor_mode=config.saerl_mpc_anchor_mode,
                 target_soc=config.target_soc,
                 eval_score_soc_weight=eval_score_soc_weight,
                 eval_score_time_weight=eval_score_time_weight,

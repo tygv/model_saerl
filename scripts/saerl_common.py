@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -17,6 +18,8 @@ from hambrl_pack_env import HAMBRLPackEnvironment
 from pack_experiments import ChargingObjective
 from scripts.run_baseline_benchmarks import (
     BenchmarkConfig,
+    CCCVConfig,
+    MPCConfig,
     apply_data_profile_to_pack,
     apply_fitted_params_to_pack,
     collect_data_calibrated_scenarios,
@@ -42,14 +45,142 @@ class SAERLScenarioSetting:
     source_is_cell_level: bool
 
 
+SOURCE_CONTEXT_COLUMNS_V1: Tuple[str, ...] = (
+    "ctx_family_nasa",
+    "ctx_family_calce",
+    "ctx_family_matr",
+    "ctx_regime_aging_eis",
+    "ctx_regime_cycle_cccv",
+    "ctx_regime_fast_charge",
+    "ctx_nominal_capacity_ah",
+    "ctx_source_dt_median_s",
+    "ctx_source_dt_q95_s",
+    "ctx_source_current_abs_q95_a",
+    "ctx_source_temp_present",
+    "ctx_source_temp_missing_frac",
+    "ctx_source_cycle_index_max",
+    "ctx_source_step_index_max",
+    "ctx_source_internal_resistance_present",
+    "ctx_source_internal_resistance_median_ohm",
+    "ctx_source_internal_resistance_q95_ohm",
+    "ctx_source_ac_impedance_present",
+    "ctx_source_ac_impedance_median_ohm",
+    "ctx_source_ac_impedance_q95_ohm",
+    "ctx_source_nasa_impedance_present",
+    "ctx_source_nasa_rectified_impedance_median_ohm",
+    "ctx_source_nasa_rectified_impedance_q95_ohm",
+)
+
+
 def split_csv_arg(value: str) -> List[str]:
     return [x.strip().lower() for x in str(value).split(",") if x.strip()]
+
+
+def _context_float(value: Any, default: float = 0.0) -> float:
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return float(default)
+    if not np.isfinite(out):
+        return float(default)
+    return float(out)
+
+
+def _clip_float(value: Any, scale: float, lower: float = 0.0, upper: float = 10.0) -> float:
+    raw = _context_float(value, default=0.0)
+    if scale <= 0:
+        return float(np.clip(raw, lower, upper))
+    return float(np.clip(raw / float(scale), lower, upper))
+
+
+def _log_scaled(value: Any, max_value: float) -> float:
+    raw = max(0.0, _context_float(value, default=0.0))
+    denom = np.log1p(max(float(max_value), 1.0))
+    if denom <= 0:
+        return 0.0
+    return float(np.clip(np.log1p(raw) / denom, 0.0, 1.0))
+
+
+def load_family_metadata(path: str = "configs/source_family_metadata_v1.json") -> Dict[str, Any]:
+    p = Path(path)
+    with p.open("r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict):
+        raise ValueError("family metadata JSON must be a dict")
+    return payload
+
+
+def get_context_columns(context_feature_set: str = "none") -> List[str]:
+    mode = str(context_feature_set).strip().lower()
+    if mode == "source_v1":
+        return list(SOURCE_CONTEXT_COLUMNS_V1)
+    return []
+
+
+def build_source_context(
+    family: str,
+    profile: Dict[str, Any],
+    family_metadata: Optional[Dict[str, Any]] = None,
+    context_feature_set: str = "none",
+) -> Dict[str, float]:
+    mode = str(context_feature_set).strip().lower()
+    if mode != "source_v1":
+        return {}
+
+    family_key = str(family).strip().lower()
+    metadata = family_metadata or {}
+    family_node = {}
+    if isinstance(metadata.get("families"), dict):
+        family_node = metadata["families"].get(family_key, {}) or {}
+    regime = str(family_node.get("test_regime", "")).strip().lower()
+
+    out = {
+        "ctx_family_nasa": 1.0 if family_key == "nasa" else 0.0,
+        "ctx_family_calce": 1.0 if family_key == "calce" else 0.0,
+        "ctx_family_matr": 1.0 if family_key == "matr" else 0.0,
+        "ctx_regime_aging_eis": 1.0 if regime == "aging_eis" else 0.0,
+        "ctx_regime_cycle_cccv": 1.0 if regime == "cycle_cccv" else 0.0,
+        "ctx_regime_fast_charge": 1.0 if regime == "fast_charge" else 0.0,
+        "ctx_nominal_capacity_ah": _clip_float(family_node.get("nominal_capacity_ah", 0.0), scale=5.0, upper=5.0),
+        "ctx_source_dt_median_s": _clip_float(profile.get("source_dt_median_s", profile.get("dt_s", 0.0)), scale=60.0, upper=300.0),
+        "ctx_source_dt_q95_s": _clip_float(profile.get("source_dt_q95_s", profile.get("dt_s", 0.0)), scale=60.0, upper=300.0),
+        "ctx_source_current_abs_q95_a": _clip_float(profile.get("source_current_abs_q95_a", profile.get("current_abs_q95_a", 0.0)), scale=10.0, upper=10.0),
+        "ctx_source_temp_present": 1.0 if _context_float(profile.get("source_temp_present", 0.0)) > 0.5 else 0.0,
+        "ctx_source_temp_missing_frac": float(np.clip(_context_float(profile.get("source_temp_missing_frac", 1.0), default=1.0), 0.0, 1.0)),
+        "ctx_source_cycle_index_max": _log_scaled(profile.get("source_cycle_index_max", 0.0), max_value=5000.0),
+        "ctx_source_step_index_max": _log_scaled(profile.get("source_step_index_max", 0.0), max_value=1000.0),
+        "ctx_source_internal_resistance_present": 1.0 if _context_float(profile.get("source_internal_resistance_present", 0.0)) > 0.5 else 0.0,
+        "ctx_source_internal_resistance_median_ohm": _clip_float(profile.get("source_internal_resistance_median_ohm", 0.0), scale=0.2, upper=10.0),
+        "ctx_source_internal_resistance_q95_ohm": _clip_float(profile.get("source_internal_resistance_q95_ohm", 0.0), scale=0.2, upper=10.0),
+        "ctx_source_ac_impedance_present": 1.0 if _context_float(profile.get("source_ac_impedance_present", 0.0)) > 0.5 else 0.0,
+        "ctx_source_ac_impedance_median_ohm": _clip_float(profile.get("source_ac_impedance_median_ohm", 0.0), scale=0.2, upper=10.0),
+        "ctx_source_ac_impedance_q95_ohm": _clip_float(profile.get("source_ac_impedance_q95_ohm", 0.0), scale=0.2, upper=10.0),
+        "ctx_source_nasa_impedance_present": 1.0 if _context_float(profile.get("source_nasa_impedance_present", 0.0)) > 0.5 else 0.0,
+        "ctx_source_nasa_rectified_impedance_median_ohm": _clip_float(profile.get("source_nasa_rectified_impedance_median_ohm", 0.0), scale=0.2, upper=10.0),
+        "ctx_source_nasa_rectified_impedance_q95_ohm": _clip_float(profile.get("source_nasa_rectified_impedance_q95_ohm", 0.0), scale=0.2, upper=10.0),
+    }
+    return {key: float(out.get(key, 0.0)) for key in SOURCE_CONTEXT_COLUMNS_V1}
+
+
+def scenario_context_array(
+    scenario: Dict[str, Any],
+    context_feature_set: str = "none",
+    context_columns: Optional[Iterable[str]] = None,
+) -> np.ndarray:
+    cols = list(context_columns) if context_columns is not None else get_context_columns(context_feature_set)
+    if not cols:
+        return np.zeros((0,), dtype=np.float32)
+    ctx = scenario.get("source_context", {}) if isinstance(scenario, dict) else {}
+    if not isinstance(ctx, dict):
+        ctx = {}
+    return np.asarray([_context_float(ctx.get(col, 0.0)) for col in cols], dtype=np.float32)
 
 
 def load_data_calibrated_scenarios(
     standardized_root: str = "data/standardized",
     params_root: str = "data/standardized_params",
     dataset_families: str = "nasa,calce,matr",
+    exclude_dataset_cases: str = "",
     max_files_per_dataset: int = 3,
     n_series: int = 20,
     n_parallel: int = 1,
@@ -58,6 +189,9 @@ def load_data_calibrated_scenarios(
     initial_soc: float = 0.2,
     target_soc: float = 0.8,
     ambient_temp_c: float = 25.0,
+    context_feature_set: str = "none",
+    family_metadata_json: str = "configs/source_family_metadata_v1.json",
+    nasa_impedance_root: str = "data/standardized/nasa_impedance",
 ) -> Tuple[BenchmarkConfig, List[Dict[str, Any]]]:
     run_config = BenchmarkConfig(
         objective="all",
@@ -74,11 +208,24 @@ def load_data_calibrated_scenarios(
         standardized_root=standardized_root,
         params_root=params_root,
         dataset_families=dataset_families,
+        exclude_dataset_cases=exclude_dataset_cases,
         max_files_per_dataset=max_files_per_dataset,
         data_is_cell_level=True,
         include_cell_figures=False,
+        nasa_impedance_root=nasa_impedance_root,
     )
     scenarios = collect_data_calibrated_scenarios(run_config)
+    context_columns = get_context_columns(context_feature_set)
+    family_metadata: Optional[Dict[str, Any]] = None
+    if context_columns:
+        family_metadata = load_family_metadata(family_metadata_json)
+    for scenario in scenarios:
+        scenario["source_context"] = build_source_context(
+            family=str(scenario.get("family", "")),
+            profile=scenario.get("profile", {}),
+            family_metadata=family_metadata,
+            context_feature_set=context_feature_set,
+        )
     return run_config, scenarios
 
 
@@ -235,6 +382,158 @@ def apply_domain_randomization(env: HAMBRLPackEnvironment, rng: np.random.Genera
         cell.params.C_th = float(max(1.0, cell.params.C_th * scale_th))
         cell.params.hA = float(max(1e-3, cell.params.hA * scale_th))
     env.pack._update_pack_state()
+
+
+BASELINE_FAMILY_TUNES: Dict[str, Dict[str, float]] = {
+    "nasa": {
+        "cccv_kp_mult": 1.12,
+        "cccv_ki_mult": 1.08,
+        "cccv_taper_mult": 0.92,
+        "cccv_hyst_mult": 0.90,
+        "mpc_w_soc_mult": 1.12,
+        "mpc_w_temp_mult": 1.05,
+        "mpc_w_imb_mult": 1.10,
+        "mpc_horizon_mult": 1.00,
+    },
+    "calce": {
+        "cccv_kp_mult": 1.18,
+        "cccv_ki_mult": 1.12,
+        "cccv_taper_mult": 0.85,
+        "cccv_hyst_mult": 0.85,
+        "mpc_w_soc_mult": 1.20,
+        "mpc_w_temp_mult": 0.95,
+        "mpc_w_imb_mult": 1.05,
+        "mpc_horizon_mult": 0.95,
+    },
+    "matr": {
+        "cccv_kp_mult": 0.92,
+        "cccv_ki_mult": 0.90,
+        "cccv_taper_mult": 1.10,
+        "cccv_hyst_mult": 1.10,
+        "mpc_w_soc_mult": 1.00,
+        "mpc_w_temp_mult": 1.20,
+        "mpc_w_imb_mult": 1.20,
+        "mpc_horizon_mult": 1.15,
+    },
+}
+
+
+BASELINE_OBJECTIVE_TUNES: Dict[str, Dict[str, float]] = {
+    "fastest": {
+        "cccv_kp_mult": 1.08,
+        "cccv_ki_mult": 1.05,
+        "cccv_taper_mult": 0.88,
+        "cccv_hyst_mult": 0.95,
+        "mpc_w_soc_mult": 1.25,
+        "mpc_w_temp_mult": 0.90,
+        "mpc_w_imb_mult": 0.95,
+        "mpc_horizon_mult": 0.90,
+    },
+    "safe": {
+        "cccv_kp_mult": 0.98,
+        "cccv_ki_mult": 0.98,
+        "cccv_taper_mult": 1.05,
+        "cccv_hyst_mult": 1.05,
+        "mpc_w_soc_mult": 1.00,
+        "mpc_w_temp_mult": 1.15,
+        "mpc_w_imb_mult": 1.10,
+        "mpc_horizon_mult": 1.05,
+    },
+    "long_life": {
+        "cccv_kp_mult": 0.92,
+        "cccv_ki_mult": 0.90,
+        "cccv_taper_mult": 1.15,
+        "cccv_hyst_mult": 1.12,
+        "mpc_w_soc_mult": 0.95,
+        "mpc_w_temp_mult": 1.20,
+        "mpc_w_imb_mult": 1.25,
+        "mpc_horizon_mult": 1.15,
+    },
+}
+
+
+def _blend_multiplier(mult: float, alpha: float) -> float:
+    return float(1.0 + alpha * (float(mult) - 1.0))
+
+
+def chemistry_aware_cccv_config(family: str, mode: str, objective_key: str) -> CCCVConfig:
+    cfg = CCCVConfig()
+    tune = BASELINE_FAMILY_TUNES.get(str(family).lower(), BASELINE_FAMILY_TUNES["nasa"])
+    obj_tune = BASELINE_OBJECTIVE_TUNES.get(str(objective_key).lower(), {})
+    mode_l = str(mode).strip().lower()
+    alpha = 1.0 if mode_l == "family_specific" else (0.5 if mode_l == "shared_plus_heads" else 0.0)
+    kp_mult = _blend_multiplier(tune["cccv_kp_mult"], alpha) * float(obj_tune.get("cccv_kp_mult", 1.0))
+    ki_mult = _blend_multiplier(tune["cccv_ki_mult"], alpha) * float(obj_tune.get("cccv_ki_mult", 1.0))
+    taper_mult = _blend_multiplier(tune["cccv_taper_mult"], alpha) * float(obj_tune.get("cccv_taper_mult", 1.0))
+    hyst_mult = _blend_multiplier(tune["cccv_hyst_mult"], alpha) * float(obj_tune.get("cccv_hyst_mult", 1.0))
+    cfg.kp_a_per_v *= kp_mult
+    cfg.ki_a_per_vs *= ki_mult
+    cfg.soc_taper_window *= taper_mult
+    cfg.cv_hysteresis_v *= hyst_mult
+    cfg.soc_taper_window = float(np.clip(cfg.soc_taper_window, 0.03, 0.20))
+    cfg.cv_hysteresis_v = float(np.clip(cfg.cv_hysteresis_v, 0.05, 0.35))
+    return cfg
+
+
+def chemistry_aware_mpc_config(family: str, mode: str, objective_key: str) -> MPCConfig:
+    cfg = MPCConfig()
+    tune = BASELINE_FAMILY_TUNES.get(str(family).lower(), BASELINE_FAMILY_TUNES["nasa"])
+    obj_tune = BASELINE_OBJECTIVE_TUNES.get(str(objective_key).lower(), {})
+    mode_l = str(mode).strip().lower()
+    alpha = 1.0 if mode_l == "family_specific" else (0.5 if mode_l == "shared_plus_heads" else 0.0)
+    w_soc_mult = _blend_multiplier(tune["mpc_w_soc_mult"], alpha) * float(obj_tune.get("mpc_w_soc_mult", 1.0))
+    w_temp_mult = _blend_multiplier(tune["mpc_w_temp_mult"], alpha) * float(obj_tune.get("mpc_w_temp_mult", 1.0))
+    w_imb_mult = _blend_multiplier(tune["mpc_w_imb_mult"], alpha) * float(obj_tune.get("mpc_w_imb_mult", 1.0))
+    horizon_mult = _blend_multiplier(tune["mpc_horizon_mult"], alpha) * float(obj_tune.get("mpc_horizon_mult", 1.0))
+    cfg.w_soc *= w_soc_mult
+    cfg.w_temp *= w_temp_mult
+    cfg.w_imbalance *= w_imb_mult
+    cfg.horizon_steps = int(np.clip(round(cfg.horizon_steps * horizon_mult), 4, 16))
+    return cfg
+
+
+def recommend_episode_max_steps(
+    setting: SAERLScenarioSetting,
+    base_max_steps: int,
+    target_soc: float,
+    min_episode_minutes: float,
+    feasible_time_slack: float,
+    max_steps_cap: int,
+) -> Tuple[int, Dict[str, float]]:
+    base_steps = int(max(1, base_max_steps))
+    dt_s = float(max(1e-6, setting.dt_s))
+    base_horizon_s = float(base_steps * dt_s)
+
+    capacity_ah = float(max(1e-6, setting.pack_config.get_total_capacity()))
+    soc_gap = float(max(0.0, target_soc - setting.initial_soc))
+    max_current_a = float(max(1e-6, setting.max_charge_current_a))
+
+    ideal_cc_time_to_target_s = float((soc_gap * capacity_ah * 3600.0) / max_current_a)
+    min_horizon_s = float(max(0.0, min_episode_minutes) * 60.0)
+    feasible_horizon_s = float(max(0.0, feasible_time_slack) * ideal_cc_time_to_target_s)
+    recommended_horizon_s = float(max(base_horizon_s, min_horizon_s, feasible_horizon_s))
+
+    recommended_steps = int(max(base_steps, int(np.ceil(recommended_horizon_s / dt_s))))
+    if int(max_steps_cap) > 0:
+        recommended_steps = int(min(recommended_steps, int(max_steps_cap)))
+        recommended_horizon_s = float(recommended_steps * dt_s)
+
+    required_current_for_base_horizon_a = float(
+        (soc_gap * capacity_ah * 3600.0) / max(base_horizon_s, 1e-6)
+    )
+    feasibility_ratio = float(max_current_a / max(required_current_for_base_horizon_a, 1e-6))
+
+    return recommended_steps, {
+        "dt_s": dt_s,
+        "base_max_steps": float(base_steps),
+        "effective_max_steps": float(recommended_steps),
+        "base_horizon_s": base_horizon_s,
+        "effective_horizon_s": recommended_horizon_s,
+        "ideal_cc_time_to_target_s": ideal_cc_time_to_target_s,
+        "required_current_for_base_horizon_a": required_current_for_base_horizon_a,
+        "configured_max_charge_current_a": max_current_a,
+        "current_feasibility_ratio_vs_base_horizon": feasibility_ratio,
+    }
 
 
 def deterministic_hash_float(key: str) -> float:

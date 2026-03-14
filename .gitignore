@@ -2,6 +2,7 @@
 /data/**
 !/data/**/
 !/data/**/.gitkeep
+!/data/DATASET_SOURCES.md
 
 # Ignore generated experiment outputs/checkpoints
 /results/**
@@ -13,6 +14,18 @@
 
 # Ignore local tooling/state folders
 /.qodo/
+
+# Ignore paper workspace outputs and side files by default,
+# but keep the manuscript sources and results-section figures.
+/paper/**
+!/paper/main.tex
+!/paper/references.bib
+!/paper/figures/
+!/paper/figures/results_section/
+!/paper/figures/results_section/**
+
+# Ignore ebook PDFs and related local reference material.
+/ebooks/**
 
 # Ignore Python bytecode caches
 __pycache__/

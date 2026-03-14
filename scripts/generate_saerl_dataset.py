@@ -19,13 +19,16 @@ if str(ROOT_DIR) not in sys.path:
 
 from controllers.adaptive_ensemble_rl import SAERLConfig, window_to_sequence
 from pack_experiments import build_default_objectives
-from scripts.run_baseline_benchmarks import CCCVConfig, CCCVController, RolloutMPCController, MPCConfig, count_safety_events, trim_pack_histories
+from scripts.run_baseline_benchmarks import CCCVConfig, CCCVController, RolloutMPCController, count_safety_events, trim_pack_histories
 from scripts.saerl_common import (
     build_leave_case_out_folds,
     build_setting_for_objective,
+    chemistry_aware_mpc_config,
+    get_context_columns,
     initial_state_from_env,
     load_data_calibrated_scenarios,
     make_env,
+    recommend_episode_max_steps,
 )
 
 
@@ -38,6 +41,7 @@ class DatasetConfig:
     standardized_root: str = "data/standardized"
     params_root: str = "data/standardized_params"
     dataset_families: str = "nasa,calce,matr"
+    exclude_dataset_cases: str = ""
     max_files_per_dataset: int = 3
     episodes_per_setting: int = 2
     max_steps: int = 500
@@ -70,6 +74,14 @@ class DatasetConfig:
     cem_profile_json: str = ""
     cem_label_interval: int = 1
     baseline_results_root: str = "results/baselines/data_calibrated"
+    saerl_mpc_anchor_mode: str = "family_specific"
+    context_feature_set: str = "none"
+    family_metadata_json: str = "configs/source_family_metadata_v1.json"
+    nasa_impedance_root: str = "data/standardized/nasa_impedance"
+    adaptive_horizon: bool = True
+    min_episode_minutes: float = 120.0
+    feasible_time_slack: float = 1.35
+    max_steps_cap: int = 5000
     n_folds: int = 3
     random_seed: int = 123
     window_len: int = 20
@@ -94,6 +106,12 @@ def parse_args() -> DatasetConfig:
     parser.add_argument("--standardized-root", type=str, default="data/standardized")
     parser.add_argument("--params-root", type=str, default="data/standardized_params")
     parser.add_argument("--dataset-families", type=str, default="nasa,calce,matr")
+    parser.add_argument(
+        "--exclude-dataset-cases",
+        type=str,
+        default="",
+        help="Optional comma list of family/case_id pairs to skip during scenario selection.",
+    )
     parser.add_argument("--max-files-per-dataset", type=int, default=3)
     parser.add_argument("--episodes-per-setting", type=int, default=2)
     parser.add_argument("--max-steps", type=int, default=500)
@@ -144,6 +162,61 @@ def parse_args() -> DatasetConfig:
         default="results/baselines/data_calibrated",
         help="Baseline metrics root used to detect final_soc_gain-mode scenarios.",
     )
+    parser.add_argument(
+        "--saerl-mpc-anchor-mode",
+        type=str,
+        default="family_specific",
+        choices=["global", "family_specific", "shared_plus_heads"],
+        help="Chemistry-aware MPC anchor mode used by SAERL data generation.",
+    )
+    parser.add_argument(
+        "--context-feature-set",
+        type=str,
+        default="none",
+        choices=["none", "source_v1"],
+        help="Optional static context feature set appended as ctx_* columns.",
+    )
+    parser.add_argument(
+        "--family-metadata-json",
+        type=str,
+        default="configs/source_family_metadata_v1.json",
+        help="Family metadata JSON used to build source_v1 context features.",
+    )
+    parser.add_argument(
+        "--nasa-impedance-root",
+        type=str,
+        default="data/standardized/nasa_impedance",
+        help="Optional NASA impedance sidecar root used by source_v1 context features.",
+    )
+    parser.add_argument(
+        "--disable-adaptive-horizon",
+        action="store_true",
+        help=(
+            "Disable horizon scaling based on dt/current feasibility. "
+            "By default adaptive horizon is enabled for training data generation."
+        ),
+    )
+    parser.add_argument(
+        "--min-episode-minutes",
+        type=float,
+        default=120.0,
+        help="Minimum physical episode duration used by adaptive horizon scaling.",
+    )
+    parser.add_argument(
+        "--feasible-time-slack",
+        type=float,
+        default=1.35,
+        help=(
+            "Multiplier on ideal CC time-to-target when computing adaptive episode horizon "
+            "(>1 adds taper/degradation slack)."
+        ),
+    )
+    parser.add_argument(
+        "--max-steps-cap",
+        type=int,
+        default=5000,
+        help="Upper cap on adaptive max steps per episode (<=0 disables cap).",
+    )
     parser.add_argument("--n-folds", type=int, default=3)
     parser.add_argument("--random-seed", type=int, default=123)
     parser.add_argument("--window-len", type=int, default=20)
@@ -157,6 +230,7 @@ def parse_args() -> DatasetConfig:
         standardized_root=args.standardized_root,
         params_root=args.params_root,
         dataset_families=args.dataset_families,
+        exclude_dataset_cases=args.exclude_dataset_cases,
         max_files_per_dataset=args.max_files_per_dataset,
         episodes_per_setting=args.episodes_per_setting,
         max_steps=args.max_steps,
@@ -189,6 +263,14 @@ def parse_args() -> DatasetConfig:
         cem_profile_json=args.cem_profile_json,
         cem_label_interval=args.cem_label_interval,
         baseline_results_root=args.baseline_results_root,
+        saerl_mpc_anchor_mode=args.saerl_mpc_anchor_mode,
+        context_feature_set=args.context_feature_set,
+        family_metadata_json=args.family_metadata_json,
+        nasa_impedance_root=args.nasa_impedance_root,
+        adaptive_horizon=not bool(args.disable_adaptive_horizon),
+        min_episode_minutes=float(args.min_episode_minutes),
+        feasible_time_slack=float(args.feasible_time_slack),
+        max_steps_cap=int(args.max_steps_cap),
         n_folds=args.n_folds,
         random_seed=args.random_seed,
         window_len=args.window_len,
@@ -601,6 +683,7 @@ def main() -> None:
         standardized_root=config.standardized_root,
         params_root=config.params_root,
         dataset_families=config.dataset_families,
+        exclude_dataset_cases=config.exclude_dataset_cases,
         max_files_per_dataset=config.max_files_per_dataset,
         n_series=config.n_series,
         n_parallel=config.n_parallel,
@@ -609,9 +692,13 @@ def main() -> None:
         initial_soc=config.initial_soc,
         target_soc=config.target_soc,
         ambient_temp_c=config.ambient_temp_c,
+        context_feature_set=config.context_feature_set,
+        family_metadata_json=config.family_metadata_json,
+        nasa_impedance_root=config.nasa_impedance_root,
     )
     if not scenarios:
         raise SystemExit("No data-calibrated scenarios were found.")
+    context_columns = get_context_columns(config.context_feature_set)
 
     rows: List[Dict[str, Any]] = []
     episodes_meta: List[Dict[str, Any]] = []
@@ -646,11 +733,39 @@ def main() -> None:
                 episode_counter += 1
                 behavior_policy = choose_behavior_policy(rng=rng, mix=mix)
 
-                env = make_env(setting=setting, max_steps=config.max_steps, target_soc=config.target_soc)
+                if config.adaptive_horizon:
+                    episode_max_steps, horizon_info = recommend_episode_max_steps(
+                        setting=setting,
+                        base_max_steps=config.max_steps,
+                        target_soc=config.target_soc,
+                        min_episode_minutes=config.min_episode_minutes,
+                        feasible_time_slack=config.feasible_time_slack,
+                        max_steps_cap=config.max_steps_cap,
+                    )
+                else:
+                    episode_max_steps = int(max(1, config.max_steps))
+                    dt_s = float(max(1e-6, setting.dt_s))
+                    horizon_info = {
+                        "dt_s": dt_s,
+                        "base_max_steps": float(config.max_steps),
+                        "effective_max_steps": float(episode_max_steps),
+                        "base_horizon_s": float(config.max_steps * dt_s),
+                        "effective_horizon_s": float(episode_max_steps * dt_s),
+                        "ideal_cc_time_to_target_s": float("nan"),
+                        "required_current_for_base_horizon_a": float("nan"),
+                        "configured_max_charge_current_a": float(setting.max_charge_current_a),
+                        "current_feasibility_ratio_vs_base_horizon": float("nan"),
+                    }
+
+                env = make_env(setting=setting, max_steps=episode_max_steps, target_soc=config.target_soc)
                 env.reset(initial_soc=setting.initial_soc, temperature=setting.initial_temp_c)
                 trim_pack_histories(env.pack)
                 mpc = RolloutMPCController(
-                    config=MPCConfig(),
+                    config=chemistry_aware_mpc_config(
+                        family=family,
+                        mode=config.saerl_mpc_anchor_mode,
+                        objective_key=objective_key,
+                    ),
                     cv_voltage_v=setting.cv_voltage_v,
                     max_charge_current_a=setting.max_charge_current_a,
                     target_soc=config.target_soc,
@@ -671,7 +786,7 @@ def main() -> None:
 
                 cem_interval = max(1, int(config.cem_label_interval))
                 last_cem_target = 0.0
-                for step_idx in range(config.max_steps):
+                for step_idx in range(episode_max_steps):
                     mpc_action, mpc_info = mpc.act(state, env)
                     cccv_action, cccv_info = cccv.act(state, env)
 
@@ -760,7 +875,19 @@ def main() -> None:
                         "safety_event_count": int(count_safety_events(next_state.get("safety_events", {}))),
                         "cv_voltage_v": float(setting.cv_voltage_v),
                         "max_charge_current_a": float(setting.max_charge_current_a),
+                        "episode_max_steps": int(episode_max_steps),
+                        "horizon_dt_s": float(horizon_info["dt_s"]),
+                        "horizon_base_horizon_s": float(horizon_info["base_horizon_s"]),
+                        "horizon_effective_horizon_s": float(horizon_info["effective_horizon_s"]),
+                        "horizon_ideal_cc_time_to_target_s": float(horizon_info["ideal_cc_time_to_target_s"]),
+                        "horizon_feasibility_ratio_vs_base": float(horizon_info["current_feasibility_ratio_vs_base_horizon"]),
                     }
+                    if context_columns:
+                        source_context = scenario.get("source_context", {}) if isinstance(scenario, dict) else {}
+                        if not isinstance(source_context, dict):
+                            source_context = {}
+                        for col in context_columns:
+                            row[col] = float(source_context.get(col, 0.0))
                     for t in range(seq.shape[0]):
                         for f in range(seq.shape[1]):
                             row[f"window_t{t:02d}_f{f:02d}"] = float(seq[t, f])
@@ -789,8 +916,21 @@ def main() -> None:
                         "n_steps": int(step_idx + 1),
                         "cv_voltage_v": float(setting.cv_voltage_v),
                         "max_charge_current_a": float(setting.max_charge_current_a),
+                        "episode_max_steps": int(episode_max_steps),
+                        "horizon_dt_s": float(horizon_info["dt_s"]),
+                        "horizon_base_horizon_s": float(horizon_info["base_horizon_s"]),
+                        "horizon_effective_horizon_s": float(horizon_info["effective_horizon_s"]),
+                        "horizon_ideal_cc_time_to_target_s": float(horizon_info["ideal_cc_time_to_target_s"]),
+                        "horizon_feasibility_ratio_vs_base": float(horizon_info["current_feasibility_ratio_vs_base_horizon"]),
                     }
                 )
+                if context_columns:
+                    for col in context_columns:
+                        episodes_meta[-1][col] = float(
+                            scenario.get("source_context", {}).get(col, 0.0)
+                            if isinstance(scenario.get("source_context", {}), dict)
+                            else 0.0
+                        )
 
     if not rows:
         raise SystemExit("No rows generated.")
@@ -835,6 +975,9 @@ def main() -> None:
         "feature_dim": int(saerl_cfg.feature_dim),
         "window_len": int(saerl_cfg.window_len),
         "window_columns": [c for c in dataset_df.columns if c.startswith("window_t")],
+        "context_feature_set": str(config.context_feature_set),
+        "context_columns": context_columns,
+        "context_dim": int(len(context_columns)),
         "target_columns": ["next_soc", "next_voltage", "next_temp", "next_imbalance"],
         "episodes_csv": str(episodes_csv),
     }

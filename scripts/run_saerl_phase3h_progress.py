@@ -89,6 +89,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-files-per-dataset", type=int, default=3)
     p.add_argument("--episodes-per-setting", type=int, default=2)
     p.add_argument("--max-steps", type=int, default=160)
+    p.add_argument("--min-episode-minutes", type=float, default=120.0)
+    p.add_argument("--feasible-time-slack", type=float, default=1.35)
+    p.add_argument("--max-steps-cap", type=int, default=5000)
+    p.add_argument(
+        "--saerl-mpc-anchor-mode",
+        type=str,
+        default="family_specific",
+        choices=["global", "family_specific", "shared_plus_heads"],
+    )
     return p.parse_args()
 
 
@@ -132,6 +141,14 @@ def main() -> None:
                 "configs/saerl_phase3h_cem_progress_profile.json",
                 "--baseline-results-root",
                 "results/baselines/data_calibrated",
+                "--saerl-mpc-anchor-mode",
+                args.saerl_mpc_anchor_mode,
+                "--min-episode-minutes",
+                str(args.min_episode_minutes),
+                "--feasible-time-slack",
+                str(args.feasible_time_slack),
+                "--max-steps-cap",
+                str(args.max_steps_cap),
                 "--random-seed",
                 str(args.random_seed),
             ]
@@ -191,6 +208,14 @@ def main() -> None:
                     fam,
                     "--baseline-results-root",
                     "results/baselines/data_calibrated",
+                    "--saerl-mpc-anchor-mode",
+                    args.saerl_mpc_anchor_mode,
+                    "--min-episode-minutes",
+                    str(args.min_episode_minutes),
+                    "--feasible-time-slack",
+                    str(args.feasible_time_slack),
+                    "--max-steps-cap",
+                    str(args.max_steps_cap),
                     "--saerl-family-profile-json",
                     "configs/saerl_phase3h_policy_progress_profile.json",
                     "--random-seed",
@@ -228,6 +253,8 @@ def main() -> None:
                 "--chemistry-families",
                 stage.dataset_families,
                 "--chemistry-aware-baselines",
+                "--saerl-mpc-anchor-mode",
+                args.saerl_mpc_anchor_mode,
                 "--saerl-eval-calibration-json",
                 "configs/saerl_phase3h_eval_push.json",
                 "--skip-detailed-figures",

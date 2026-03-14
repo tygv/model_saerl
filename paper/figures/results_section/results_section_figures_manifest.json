@@ -1,0 +1,22 @@
+{
+  "aggregate_root": "results\\saerl_phase3h_source_context_v1\\aggregate_allfolds_3family",
+  "evaluation_root": "results\\saerl_phase3h_source_context_v1\\evaluation_allfolds_3family",
+  "output_root": "paper\\figures\\results_section",
+  "case": {
+    "fold_id": 0,
+    "objective": "fastest",
+    "dataset_family": "matr",
+    "dataset_case": "2018-09-06_oed_2_CH6"
+  },
+  "figures": [
+    "fig2_overall_pass_fail_counts",
+    "fig_controller_pareto_time_vs_safety",
+    "fig3_criterion_pass_fail_percent",
+    "fig4_grouped_pass_counts_family_objective",
+    "fig5_training_gap",
+    "fig6_ablation_tradeoff",
+    "fig7_gate_uncertainty_dynamics",
+    "fig8_latency_breakdown",
+    "fig9_case_study_matr_fastest_trajectories"
+  ]
+}

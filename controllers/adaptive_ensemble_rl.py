@@ -6,7 +6,7 @@ import copy
 import json
 import pickle
 from collections import deque
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Deque, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -33,6 +33,32 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     if not np.isfinite(out):
         return float(default)
     return out
+
+
+def _normalize_context_array(
+    context: Optional[Any],
+    context_dim: int,
+    context_columns: Optional[Sequence[str]] = None,
+) -> np.ndarray:
+    dim = int(max(0, context_dim))
+    if dim <= 0:
+        return np.zeros((0,), dtype=np.float32)
+    if context is None:
+        return np.zeros((dim,), dtype=np.float32)
+    if isinstance(context, dict):
+        cols = list(context_columns or [])
+        if cols:
+            values = [_safe_float(context.get(col, 0.0)) for col in cols]
+        else:
+            values = [_safe_float(v) for _, v in sorted(context.items(), key=lambda kv: str(kv[0]))]
+    else:
+        arr = np.asarray(context, dtype=np.float32).reshape(-1)
+        values = [_safe_float(v) for v in arr.tolist()]
+    arr_out = np.zeros((dim,), dtype=np.float32)
+    if values:
+        trimmed = np.asarray(values[:dim], dtype=np.float32)
+        arr_out[: trimmed.size] = trimmed
+    return arr_out
 
 
 def state_to_feature_vector(state: Dict[str, Any], max_charge_current_a: float = 10.0) -> np.ndarray:
@@ -93,6 +119,7 @@ class QuantileGRUModel(nn.Module):
         self,
         feature_dim: int,
         target_dim: int,
+        context_dim: int = 0,
         hidden_dim: int = 64,
         num_layers: int = 2,
         dropout: float = 0.1,
@@ -100,6 +127,7 @@ class QuantileGRUModel(nn.Module):
         super().__init__()
         self.feature_dim = int(feature_dim)
         self.target_dim = int(target_dim)
+        self.context_dim = int(max(0, context_dim))
         self.hidden_dim = int(hidden_dim)
         self.num_layers = int(num_layers)
         self.gru = nn.GRU(
@@ -110,15 +138,22 @@ class QuantileGRUModel(nn.Module):
             dropout=dropout if self.num_layers > 1 else 0.0,
         )
         self.head = nn.Sequential(
-            nn.Linear(self.hidden_dim + 1, 128),
+            nn.Linear(self.hidden_dim + 1 + self.context_dim, 128),
             nn.ReLU(),
             nn.Linear(128, 3 * self.target_dim),
         )
 
-    def forward(self, x_seq: torch.Tensor, action: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        x_seq: torch.Tensor,
+        action: torch.Tensor,
+        context: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
         h, _ = self.gru(x_seq)
         h_last = h[:, -1, :]
-        return self.head(torch.cat([h_last, action], dim=1))
+        if context is None:
+            context = torch.zeros((h_last.shape[0], self.context_dim), dtype=h_last.dtype, device=h_last.device)
+        return self.head(torch.cat([h_last, action, context], dim=1))
 
 
 class QuantileMLPModel(nn.Module):
@@ -178,24 +213,43 @@ class ResidualActorPolicy:
         self,
         input_dim: int,
         delta_action_limit: float = 0.40,
+        context_dim: int = 0,
+        context_feature_set: str = "none",
+        context_columns: Optional[Sequence[str]] = None,
         device: str = "cpu",
     ) -> None:
         self.input_dim = int(input_dim)
         self.delta_action_limit = float(delta_action_limit)
+        self.context_dim = int(max(0, context_dim))
+        self.context_feature_set = str(context_feature_set)
+        self.context_columns = tuple(str(x) for x in (context_columns or ()))
         self.device = torch.device(device)
         self.model = ResidualActorNetwork(input_dim=self.input_dim).to(self.device)
 
     @staticmethod
-    def build_input(sequence: np.ndarray, mpc_action: float, target_soc: float = 0.8) -> np.ndarray:
+    def build_input(
+        sequence: np.ndarray,
+        mpc_action: float,
+        target_soc: float = 0.8,
+        context: Optional[Any] = None,
+        context_dim: int = 0,
+        context_columns: Optional[Sequence[str]] = None,
+    ) -> np.ndarray:
         seq = np.asarray(sequence, dtype=np.float32)
         if seq.ndim != 2:
             raise ValueError(f"sequence must be [T, F], got {seq.shape}")
         soc = float(seq[-1, 0])
         soc_gap = float(np.clip(target_soc - soc, -1.0, 1.0))
+        ctx = _normalize_context_array(
+            context=context,
+            context_dim=context_dim,
+            context_columns=context_columns,
+        )
         return np.concatenate(
             [
                 seq.reshape(-1),
                 np.array([_safe_float(mpc_action), soc_gap], dtype=np.float32),
+                ctx.astype(np.float32),
             ],
             axis=0,
         ).astype(np.float32)
@@ -205,9 +259,17 @@ class ResidualActorPolicy:
         sequence: np.ndarray,
         mpc_action: float,
         target_soc: float = 0.8,
+        context: Optional[Any] = None,
         stochastic: bool = False,
     ) -> Tuple[float, Dict[str, float]]:
-        x = self.build_input(sequence=sequence, mpc_action=mpc_action, target_soc=target_soc)
+        x = self.build_input(
+            sequence=sequence,
+            mpc_action=mpc_action,
+            target_soc=target_soc,
+            context=context,
+            context_dim=self.context_dim,
+            context_columns=self.context_columns,
+        )
         x_t = torch.from_numpy(x).float().unsqueeze(0).to(self.device)
         self.model.eval()
         with torch.no_grad():
@@ -229,6 +291,9 @@ class ResidualActorPolicy:
             {
                 "input_dim": self.input_dim,
                 "delta_action_limit": self.delta_action_limit,
+                "context_dim": self.context_dim,
+                "context_feature_set": self.context_feature_set,
+                "context_columns": list(self.context_columns),
                 "model_state": self.model.state_dict(),
             },
             path,
@@ -240,6 +305,9 @@ class ResidualActorPolicy:
         obj = cls(
             input_dim=int(payload["input_dim"]),
             delta_action_limit=float(payload["delta_action_limit"]),
+            context_dim=int(payload.get("context_dim", 0)),
+            context_feature_set=str(payload.get("context_feature_set", "none")),
+            context_columns=payload.get("context_columns", []),
             device=device,
         )
         obj.model.load_state_dict(payload["model_state"])
@@ -283,6 +351,9 @@ class SAERLConfig:
     enable_shield: bool = True
     enable_antistall: bool = True
     rf_uncertainty_tree_samples: int = 32
+    context_dim: int = 0
+    context_feature_set: str = "none"
+    context_columns: Tuple[str, ...] = field(default_factory=tuple)
 
 
 class AdaptiveEnsemblePredictor:
@@ -296,11 +367,12 @@ class AdaptiveEnsemblePredictor:
         self.gru_model = QuantileGRUModel(
             feature_dim=self.config.feature_dim,
             target_dim=self.config.target_dim,
+            context_dim=self.config.context_dim,
             hidden_dim=64,
             num_layers=2,
             dropout=0.1,
         ).to(self.device)
-        flat_dim = self.config.window_len * self.config.feature_dim + 1
+        flat_dim = self.config.window_len * self.config.feature_dim + 1 + self.config.context_dim
         self.mlp_model = QuantileMLPModel(input_dim=flat_dim, target_dim=self.config.target_dim).to(
             self.device
         )
@@ -313,7 +385,13 @@ class AdaptiveEnsemblePredictor:
         )
         self.rf_fitted = False
 
-        gate_input_dim = self.config.feature_dim + 1 + len(EXPERT_KEYS) + len(EXPERT_KEYS)
+        gate_input_dim = (
+            self.config.feature_dim
+            + 1
+            + self.config.context_dim
+            + len(EXPERT_KEYS)
+            + len(EXPERT_KEYS)
+        )
         self.gate_model = GateNetwork(input_dim=gate_input_dim, n_experts=len(EXPERT_KEYS)).to(
             self.device
         )
@@ -395,6 +473,7 @@ class AdaptiveEnsemblePredictor:
         action: float,
         expert_outputs: Dict[str, Dict[str, np.ndarray]],
         max_charge_current_a: float,
+        context: Optional[Any] = None,
     ) -> np.ndarray:
         seq = window_to_sequence(
             state_window=state_window,
@@ -402,6 +481,11 @@ class AdaptiveEnsemblePredictor:
             max_charge_current_a=max_charge_current_a,
         )
         last_feat = seq[-1]
+        ctx = _normalize_context_array(
+            context=context,
+            context_dim=self.config.context_dim,
+            context_columns=self.config.context_columns,
+        )
         unc_values = []
         err_values = []
         for name in EXPERT_KEYS:
@@ -412,6 +496,7 @@ class AdaptiveEnsemblePredictor:
             [
                 last_feat.astype(np.float32),
                 np.array([_safe_float(action)], dtype=np.float32),
+                ctx.astype(np.float32),
                 np.array(unc_values, dtype=np.float32),
                 np.array(err_values, dtype=np.float32),
             ],
@@ -452,6 +537,7 @@ class AdaptiveEnsemblePredictor:
         state_window: Sequence[Dict[str, Any]],
         action: float,
         max_charge_current_a: float = 10.0,
+        context: Optional[Any] = None,
     ) -> Dict[str, Dict[str, np.ndarray]]:
         """Predict next-state targets and uncertainty for each expert."""
         seq = window_to_sequence(
@@ -459,16 +545,29 @@ class AdaptiveEnsemblePredictor:
             window_len=self.config.window_len,
             max_charge_current_a=max_charge_current_a,
         )
+        ctx = _normalize_context_array(
+            context=context,
+            context_dim=self.config.context_dim,
+            context_columns=self.config.context_columns,
+        )
         x_seq = torch.from_numpy(seq).float().unsqueeze(0).to(self.device)
         action_t = torch.tensor([[float(action)]], dtype=torch.float32, device=self.device)
+        context_t = torch.from_numpy(ctx).float().unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             self.gru_model.eval()
-            out_gru = self.gru_model(x_seq, action_t)
+            out_gru = self.gru_model(x_seq, action_t, context_t)
         q10_g, q50_g, q90_g = self._split_quantiles(out_gru)
         unc_gru = np.clip((q90_g - q10_g) * float(self.calibration["gru"]), 1e-6, None)
 
-        x_flat = np.concatenate([seq.reshape(-1), np.array([float(action)], dtype=np.float32)], axis=0)
+        x_flat = np.concatenate(
+            [
+                seq.reshape(-1),
+                np.array([float(action)], dtype=np.float32),
+                ctx.astype(np.float32),
+            ],
+            axis=0,
+        )
         x_flat_t = torch.from_numpy(x_flat).float().unsqueeze(0).to(self.device)
         with torch.no_grad():
             self.mlp_model.eval()
@@ -508,17 +607,20 @@ class AdaptiveEnsemblePredictor:
         action: float,
         max_charge_current_a: float = 10.0,
         cv_voltage_v: Optional[float] = None,
+        context: Optional[Any] = None,
     ) -> Dict[str, Any]:
         expert_outputs = self.predict_experts(
             state_window=state_window,
             action=action,
             max_charge_current_a=max_charge_current_a,
+            context=context,
         )
         gate_input = self._gate_input(
             state_window=state_window,
             action=action,
             expert_outputs=expert_outputs,
             max_charge_current_a=max_charge_current_a,
+            context=context,
         )
         weights = self._compute_weights(gate_input)
         self.step_index += 1
@@ -569,6 +671,7 @@ class AdaptiveEnsemblePredictor:
         actions: Sequence[float],
         max_charge_current_a: float = 10.0,
         cv_voltage_v: Optional[float] = None,
+        context: Optional[Any] = None,
     ) -> List[Dict[str, Any]]:
         if not actions:
             return []
@@ -580,18 +683,30 @@ class AdaptiveEnsemblePredictor:
         n = len(actions)
         seq_batch = np.repeat(seq[np.newaxis, :, :], repeats=n, axis=0).astype(np.float32)
         action_arr = np.asarray(actions, dtype=np.float32).reshape(-1, 1)
+        ctx = _normalize_context_array(
+            context=context,
+            context_dim=self.config.context_dim,
+            context_columns=self.config.context_columns,
+        )
+        ctx_batch = (
+            np.repeat(ctx.reshape(1, -1), repeats=n, axis=0).astype(np.float32)
+            if ctx.size
+            else np.zeros((n, 0), dtype=np.float32)
+        )
 
         x_seq_t = torch.from_numpy(seq_batch).float().to(self.device)
         action_t = torch.from_numpy(action_arr).float().to(self.device)
+        ctx_t = torch.from_numpy(ctx_batch).float().to(self.device)
         with torch.no_grad():
             self.gru_model.eval()
-            out_gru = self.gru_model(x_seq_t, action_t).cpu().numpy()
+            out_gru = self.gru_model(x_seq_t, action_t, ctx_t).cpu().numpy()
 
         seq_flat = seq.reshape(-1).astype(np.float32)
         x_flat_batch = np.concatenate(
             [
                 np.repeat(seq_flat[np.newaxis, :], repeats=n, axis=0),
                 action_arr,
+                ctx_batch,
             ],
             axis=1,
         ).astype(np.float32)
@@ -635,6 +750,7 @@ class AdaptiveEnsemblePredictor:
                 action=float(action_arr[i, 0]),
                 expert_outputs=expert_outputs,
                 max_charge_current_a=max_charge_current_a,
+                context=ctx_batch[i],
             )
             weights = self._compute_weights(gate_input)
 
@@ -733,6 +849,9 @@ class AdaptiveEnsemblePredictor:
         with (directory / "metadata.json").open("r", encoding="utf-8") as handle:
             meta = json.load(handle)
         config = SAERLConfig(**meta.get("config", {}))
+        config.context_dim = int(max(0, getattr(config, "context_dim", 0)))
+        config.context_feature_set = str(getattr(config, "context_feature_set", "none"))
+        config.context_columns = tuple(str(x) for x in getattr(config, "context_columns", ()))
         if config_override is not None:
             config = config_override
         obj = cls(config=config, device=device)
@@ -1110,6 +1229,7 @@ class SafeAdaptiveEnsembleController:
         env,
         mpc_action: float,
         cv_voltage_v: float,
+        context: Optional[Any] = None,
     ) -> Tuple[float, Dict[str, Any]]:
         self._append_state(state)
         state_window_list = list(self.state_window)
@@ -1128,6 +1248,7 @@ class SafeAdaptiveEnsembleController:
                 sequence=seq,
                 mpc_action=mpc_action,
                 target_soc=float(env.target_soc),
+                context=context,
                 stochastic=False,
             )
         proposal_delta = float(
@@ -1162,6 +1283,7 @@ class SafeAdaptiveEnsembleController:
             actions=candidate_actions,
             max_charge_current_a=env.max_charge_current_a,
             cv_voltage_v=cv_voltage_v,
+            context=context,
         )
         for action, fused in zip(candidate_actions, payloads):
             score = self._candidate_score(
@@ -1182,6 +1304,7 @@ class SafeAdaptiveEnsembleController:
                 action=best_action,
                 max_charge_current_a=env.max_charge_current_a,
                 cv_voltage_v=cv_voltage_v,
+                context=context,
             )
 
         antistall_action, antistall_used = self._apply_antistall(

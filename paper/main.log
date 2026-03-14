@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.22)  17 FEB 2026 15:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.10.22)  14 MAR 2026 13:53
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -683,234 +683,207 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 [1
 
 {C:/Users/robin/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-rm.enc}{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-mathit.enc}{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-mathsy.enc}]
-
-Package natbib Warning: Citation `hu2020advanced' on page 2 undefined on input line 59.
-
-
-Package natbib Warning: Citation `tomaszewska2019lithium' on page 2 undefined on input line 59.
-
-
-Package natbib Warning: Citation `liu2018charging' on page 2 undefined on input line 61.
-
-
-Package natbib Warning: Citation `zou2016multi' on page 2 undefined on input line 61.
-
-
-Package natbib Warning: Citation `liu2019brief' on page 2 undefined on input line 61.
-
-
-Package natbib Warning: Citation `waldmann2014optimization' on page 2 undefined on input line 73.
-
-
-Package natbib Warning: Citation `liu2018charging' on page 2 undefined on input line 75.
-
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10.95> on input line 63.
 
 
 [2]
 
-Package natbib Warning: Citation `duru2021' on page 3 undefined on input line 79.
-
-
-Package natbib Warning: Citation `gonzalez2024determining' on page 3 undefined on input line 83.
-
-
-Package natbib Warning: Citation `beh2019pulse' on page 3 undefined on input line 83.
-
-
-Package natbib Warning: Citation `zou2016multi' on page 3 undefined on input line 87.
-
-
-Package natbib Warning: Citation `yan2020mpc' on page 3 undefined on input line 87.
-
-
-Package natbib Warning: Citation `Zou' on page 3 undefined on input line 91.
-
-
-Package natbib Warning: Citation `Yan' on page 3 undefined on input line 91.
-
-
-Package natbib Warning: Citation `Wang2022' on page 3 undefined on input line 91.
-
-
-Package natbib Warning: Citation `Hirt2024' on page 3 undefined on input line 91.
-
-
-Package natbib Warning: Citation `Lu2024' on page 3 undefined on input line 91.
-
-
-
 [3]
 
-Package natbib Warning: Citation `Lu2024' on page 4 undefined on input line 93.
-
-
-Package natbib Warning: Citation `Wang2022' on page 4 undefined on input line 95.
-
-
-Package natbib Warning: Citation `Wang2022' on page 4 undefined on input line 100.
-
-
-
-[4]
-
-Package natbib Warning: Citation `Hirt2024' on page 5 undefined on input line 110.
-
-
-Package natbib Warning: Citation `Lu2024' on page 5 undefined on input line 112.
-
-
-Package natbib Warning: Citation `Lu2024' on page 5 undefined on input line 112.
-
-
-Package natbib Warning: Citation `liu2019brief' on page 5 undefined on input line 119.
-
-
-Package natbib Warning: Citation `wu2020battery' on page 5 undefined on input line 119.
-
-
-Package natbib Warning: Citation `wei2021safe' on page 5 undefined on input line 121.
-
-
-Package natbib Warning: Citation `lakshminarayanan2017simple' on page 5 undefined on input line 124.
-
-
-Package natbib Warning: Citation `chua2018deep' on page 5 undefined on input line 124.
-
-
-Package natbib Warning: Citation `liu2019gaussian' on page 5 undefined on input line 124.
-
-
+[4{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-mathex.enc}]
 
 [5]
 
 [6]
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 130.
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 135.
- (C:\Program Files\MiKTeX\tex/latex/lm\ts1lmr.fd
-File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
 
-LaTeX Warning: Reference `sec:physics-model' on page 7 undefined on input line 149.
-
-
-
-[7{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-mathex.enc}]
-
-Package natbib Warning: Citation `liu2018charging' on page 8 undefined on input line 166.
-
-
+[7]
 
 [8]
-
-Package natbib Warning: Citation `koenker2001quantile' on page 9 undefined on input line 191.
-
-
-Package natbib Warning: Citation `lakshminarayanan2017simple' on page 9 undefined on input line 193.
-
-
-LaTeX Warning: Reference `sec:training-data' on page 9 undefined on input line 196.
-
-
-Package natbib Warning: Citation `yan2020mpc' on page 9 undefined on input line 214.
+Overfull \hbox (6.50781pt too wide) in paragraph at lines 327--328
+[]\T1/lmr/m/n/10.95 (-20) We for-mu-late the task as a con-strained Markov de-ci-sion pro-cess de-fined by the tu-ple $\OT1/lmr/m/n/10.95 (-20) (\OMS/lmsy/m/n/10.95 S\OML/lmm/m/it/10.95 ; \OMS/lmsy/m/n/10.95 A\OML/lmm/m/it/10.95 ; P; r; c; ^^M\OT1/lmr/m/n/10.95 (-20) )$\T1/lmr/m/n/10.95 (-20) .
+ []
 
 
 
 [9]
 
-Package natbib Warning: Citation `tang2021model' on page 10 undefined on input line 232.
-
-
-Package natbib Warning: Citation `schulman2017proximal' on page 10 undefined on input line 235.
-
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 245.
-
-
 [10]
-
-Package natbib Warning: Citation `liu2018charging' on page 11 undefined on input line 276.
-
-
-Package natbib Warning: Citation `saha2008battery' on page 11 undefined on input line 281.
-
-
-Package natbib Warning: Citation `xing2014battery' on page 11 undefined on input line 282.
-
-
-Package natbib Warning: Citation `severson2019data' on page 11 undefined on input line 283.
-
-
 
 [11]
 
-Package natbib Warning: Citation `yan2020mpc' on page 12 undefined on input line 291.
+[12]
 
+[13]
+<image/SAERL architecture.png, id=453, 2541.495pt x 2938.98pt>
+File: image/SAERL architecture.png Graphic file (type png)
+<use image/SAERL architecture.png>
+Package pdftex.def Info: image/SAERL architecture.png  used on input line 530.
+(pdftex.def)             Requested size: 563.70459pt x 651.86934pt.
 
-Overfull \hbox (74.37157pt too wide) in alignment at lines 321--321
-[][][][][][] 
+Overfull \hbox (93.94957pt too wide) in paragraph at lines 530--531
+ [][] 
  []
 
 
 
-[12]
-
-LaTeX Warning: Reference `fig:gate-weights' on page 13 undefined on input line 345.
-
-
-
-[13]
-
 [14]
+Overfull \vbox (25.03932pt too high) has occurred while \output is active []
 
-[15]
+
+
+[15 <./image/SAERL architecture.png>]
 
 [16]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 426.
- (C:\Program Files\MiKTeX\tex/latex/lm\t1lmtt.fd
+
+[17]
+
+[18]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 670.
+Package microtype Info: Character `029' is missing
+(microtype)             in font `T1/lmr/m/sc/10.95'.
+(microtype)             Ignoring protrusion settings for this character.
+
+
+[19]
+
+[20]
+
+[21]
+
+[22]
+<figures/results_section/fig2_overall_pass_fail_counts.png, id=569, 556.2725pt x 339.25603pt>
+File: figures/results_section/fig2_overall_pass_fail_counts.png Graphic file (type png)
+<use figures/results_section/fig2_overall_pass_fail_counts.png>
+Package pdftex.def Info: figures/results_section/fig2_overall_pass_fail_counts.png  used on input line 877.
+(pdftex.def)             Requested size: 446.26582pt x 272.17133pt.
+
+
+[23]
+Overfull \hbox (71.54184pt too wide) in paragraph at lines 888--899
+ [][] 
+ []
+
+<figures/results_section/fig_controller_pareto_time_vs_safety.png, id=581, 541.81851pt x 346.48303pt>
+File: figures/results_section/fig_controller_pareto_time_vs_safety.png Graphic file (type png)
+<use figures/results_section/fig_controller_pareto_time_vs_safety.png>
+Package pdftex.def Info: figures/results_section/fig_controller_pareto_time_vs_safety.png  used on input line 905.
+(pdftex.def)             Requested size: 422.77664pt x 270.35612pt.
+<figures/results_section/fig3_criterion_pass_fail_percent.png, id=583, 527.36452pt x 324.59554pt>
+File: figures/results_section/fig3_criterion_pass_fail_percent.png Graphic file (type png)
+<use figures/results_section/fig3_criterion_pass_fail_percent.png>
+Package pdftex.def Info: figures/results_section/fig3_criterion_pass_fail_percent.png  used on input line 916.
+(pdftex.def)             Requested size: 422.77664pt x 260.22655pt.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 917.
+(C:\Program Files\MiKTeX\tex/latex/lm\t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
- (main.bbl
 
-Package natbib Warning: Empty `thebibliography' environment on input line 8.
+Underfull \hbox (badness 1215) in paragraph at lines 917--917
+[]\T1/lmr/m/n/10.95 (+20) Figure 4: |Criterion-level stacked pass and fail rates for \T1/lmtt/m/n/10.95 pass_safety_zero\T1/lmr/m/n/10.95 (+20) , \T1/lmtt/m/n/10.95 pass_temp\T1/lmr/m/n/10.95 (+20) ,
+ []
 
+
+
+[24 <./figures/results_section/fig2_overall_pass_fail_counts.png>]
+<figures/results_section/fig4_grouped_pass_counts_family_objective.png, id=594, 527.36452pt x 326.24742pt>
+File: figures/results_section/fig4_grouped_pass_counts_family_objective.png Graphic file (type png)
+<use figures/results_section/fig4_grouped_pass_counts_family_objective.png>
+Package pdftex.def Info: figures/results_section/fig4_grouped_pass_counts_family_objective.png  used on input line 945.
+(pdftex.def)             Requested size: 422.77664pt x 261.55086pt.
+
+
+[25]
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 994.
+
+
+[26 <./figures/results_section/fig_controller_pareto_time_vs_safety.png>]
+<figures/results_section/fig5_training_gap.png, id=618, 686.565pt x 295.89403pt>
+File: figures/results_section/fig5_training_gap.png Graphic file (type png)
+<use figures/results_section/fig5_training_gap.png>
+Package pdftex.def Info: figures/results_section/fig5_training_gap.png  used on input line 1051.
+(pdftex.def)             Requested size: 432.17375pt x 186.2562pt.
+
+
+[27 <./figures/results_section/fig3_criterion_pass_fail_percent.png>]
+<figures/results_section/fig6_ablation_tradeoff.png, id=626, 671.69803pt x 339.25603pt>
+File: figures/results_section/fig6_ablation_tradeoff.png Graphic file (type png)
+<use figures/results_section/fig6_ablation_tradeoff.png>
+Package pdftex.def Info: figures/results_section/fig6_ablation_tradeoff.png  used on input line 1083.
+(pdftex.def)             Requested size: 432.17375pt x 218.2775pt.
+<figures/results_section/fig7_gate_uncertainty_dynamics.png, id=628, 607.89394pt x 410.90657pt>
+File: figures/results_section/fig7_gate_uncertainty_dynamics.png Graphic file (type png)
+<use figures/results_section/fig7_gate_uncertainty_dynamics.png>
+Package pdftex.def Info: figures/results_section/fig7_gate_uncertainty_dynamics.png  used on input line 1094.
+(pdftex.def)             Requested size: 432.17375pt x 292.13443pt.
+
+
+[28 <./figures/results_section/fig4_grouped_pass_counts_family_objective.png>]
+<figures/results_section/fig8_latency_breakdown.png, id=637, 661.9932pt x 296.307pt>
+File: figures/results_section/fig8_latency_breakdown.png Graphic file (type png)
+<use figures/results_section/fig8_latency_breakdown.png>
+Package pdftex.def Info: figures/results_section/fig8_latency_breakdown.png  used on input line 1105.
+(pdftex.def)             Requested size: 432.17375pt x 193.44273pt.
+<figures/results_section/fig9_case_study_matr_fastest_trajectories.png, id=639, 736.12157pt x 499.28246pt>
+File: figures/results_section/fig9_case_study_matr_fastest_trajectories.png Graphic file (type png)
+<use figures/results_section/fig9_case_study_matr_fastest_trajectories.png>
+Package pdftex.def Info: figures/results_section/fig9_case_study_matr_fastest_trajectories.png  used on input line 1116.
+(pdftex.def)             Requested size: 460.35791pt x 312.24884pt.
+
+
+[29]
+
+[30]
+
+[31 <./figures/results_section/fig5_training_gap.png>]
+
+[32 <./figures/results_section/fig6_ablation_tradeoff.png>]
+
+[33 <./figures/results_section/fig7_gate_uncertainty_dynamics.png>]
+
+[34 <./figures/results_section/fig8_latency_breakdown.png>]
+
+[35 <./figures/results_section/fig9_case_study_matr_fastest_trajectories.png>] (main.bbl
+
+[36]
+
+[37]
+
+[38])
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1207.
+ (C:\Program Files\MiKTeX\tex/latex/lm\ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 
-[17]
+[39]
 
-[18]
+[40{C:/Program Files/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}]
 
-Package natbib Warning: There were undefined citations.
-
-
-
-[19] (main.aux)
+[41] (main.aux)
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-09-02>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: F3BF27D9F2341E8A7A528A08D0E0AC98;5926.
+(rerunfilecheck)             Checksum: C2307BF37EA0CCA9CEDDD638C594ABCE;13216.
  ) 
 Here is how much of TeX's memory you used:
- 22739 strings out of 468081
- 433563 string characters out of 5435855
- 861828 words of memory out of 5000000
- 50773 multiletter control sequences out of 15000+600000
- 717633 words of font info for 221 fonts, out of 8000000 for 9000
+ 23251 strings out of 468081
+ 445883 string characters out of 5435855
+ 868828 words of memory out of 5000000
+ 51047 multiletter control sequences out of 15000+600000
+ 728886 words of font info for 250 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,17n,80p,1878b,1174s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Program Files/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmex10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmmi10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr6.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr7.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr9.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmri10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmsy8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (19 pages, 434740 bytes).
+ 75i,11n,80p,2007b,1223s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Program Files/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmcsc10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmex10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmmi10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmmi6.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr6.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr7.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr9.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmri10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmsy6.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmsy8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmtk10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on main.pdf (41 pages, 2668607 bytes).
 PDF statistics:
- 414 PDF objects out of 1000 (max. 8388607)
- 102 named destinations out of 1000 (max. 500000)
- 49945 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 891 PDF objects out of 1000 (max. 8388607)
+ 288 named destinations out of 1000 (max. 500000)
+ 56875 words of extra memory for PDF output out of 61914 (max. 10000000)
 

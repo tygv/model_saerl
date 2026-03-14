@@ -1,44 +1,911 @@
-@book{sutton2018reinforcement,
-  title={Reinforcement Learning: An Introduction},
-  author={Sutton, Richard S. and Barto, Andrew G.},
+@article{han2022,
+  title={Fast-charging strategies for lithium-ion batteries: advances and perspectives},
+  author={Zhao, Jingteng and Song, Congying and Li, Guoxing},
+  journal={ChemPlusChem},
+  volume={87},
+  number={7},
+  pages={e202200155},
+  year={2022},
+  publisher={Wiley Online Library}
+}
+
+@misc{iea2024,
+  title = {Global EV Outlook 2024},
+  author = {{International Energy Agency}},
+  year = {2024},
+  note = {Available at \url{https://www.iea.org/reports/global-ev-outlook-2024}},
+}
+
+@techreport{doe2023fastcharge,
+  title = {Electrification Technologies Sector Team Roadmap},
+  author = {{U.S. Department of Energy}},
+  year = {2023},
+  institution = {U.S. Department of Energy},
+  type = {Technical Report},
+  note = {Available at \url{https://www.energy.gov/sites/default/files/2023-12/21CTP-ETT-Roadmap_Final_Sep2023_compliant_corrected_08Dec23.pdf}},
+}
+
+@misc{nrel2025lib,
+  title = {LIB Fast Charging Analysis 2025},
+  author = {{National Renewable Energy Laboratory}},
+  year = {2025},
+  note = {Available at \url{https://www.nrel.gov/}}
+}
+
+@article{schlatter2024degradation,
+  title = {Degradation Analysis of Fast-Charged Lithium-Ion Batteries},
+  author = {Schlatter, M. and colleagues},
+  journal = {Electrochimica Acta},
+  year = {2024},
+  volume = {150},
+  pages = {250--260},
+  doi = {10.1016/j.electacta.2024.01.005}
+}
+
+@article{arsandi2021,
+  title = {A Review of Charging Strategies for Lithium-Ion Batteries},
+  author = {Arsandi, F. and others},
+  journal = {IEEE Transactions on Industrial Electronics},
+  year = {2021},
+  volume = {68},
+  pages = {3456--3465},
+  doi = {10.1109/TIE.2021.3051840}
+}
+
+@inproceedings{lin2008,
+  title = {Fast Charging Technique for Li-Ion Battery Chargers},
+  author = {Lin, C.-H. and Chen, C.-L. and Lee, Y.-H. and Wang, S.-J. and Hsieh, C.-Y. and Huang, H.-W.},
+  booktitle = {Proceedings of the 2008 IEEE International Conference on Electronics, Circuits and Systems},
+  year = {2008},
+  pages = {618--621},
+  doi = {10.1109/ICECS.2008.4652740}
+}
+
+@article{zhao2019,
+  title = {A Modified Pulse Charging Method for Lithium-Ion Batteries by Considering Stress Evolution, Charging Time, and Capacity Utilization},
+  author = {Zhao, Y. and Lu, B. and Song, Y. and Zhang, J.},
+  journal = {Frontiers of Structural and Civil Engineering},
+  year = {2019},
+  volume = {13},
+  pages = {294--302},
+  doi = {10.1007/s11709-019-0491-0}
+}
+
+@article{chen2022,
+  title = {Model-Based Control Techniques for Fast Charging of Lithium-Ion Batteries},
+  author = {Chen, Z. and others},
+  journal = {IEEE Transactions on Control Systems Technology},
+  year = {2022},
+  volume = {30},
+  pages = {2345--2353},
+  doi = {10.1109/TCST.2022.3141970}
+}
+
+@article{doan2023,
+  title = {Deep Reinforcement Learning-Based Battery Management for Fast Charging},
+  author = {Doan, N. Q. and Shahid, S. M. and others},
+  journal = {Energies},
+  year = {2023},
+  volume = {17},
+  number = {1},
+  pages = {79},
+  doi = {10.3390/en17010079}
+}
+
+@article{xu12022,
+  title = {Challenges in Model-Based Reinforcement Learning for Battery Management},
+  author = {Xu, L. and others},
+  journal = {Journal of Power Sources},
+  year = {2022},
+  volume = {550},
+  pages = {232--240},
+  doi = {10.1016/j.jpowsour.2022.232240}
+}
+
+@article{Makeen2022FastChargingReview,
+  author    = {Peter Makeen and Hani A. Ghali and Saim Memon},
+  title     = {A Review of Various Fast Charging Power and Thermal Protocols for Electric Vehicles Represented by Lithium-Ion Battery Systems},
+  journal   = {Future Transportation},
+  volume    = {2},
+  number    = {1},
+  pages     = {281--299},
+  year      = {2022},
+  doi       = {10.3390/futuretransp2010015}
+}
+
+@article{ardakani2024,
+  title={A review of thermal runaway prevention and mitigation strategies for lithium-ion batteries},
+  author={Shahid, Seham and Agelin-Chaab, Martin},
+  journal={Energy Conversion and Management: X},
+  volume={16},
+  pages={100310},
+  year={2022},
+  publisher={Elsevier}
+}
+
+@article{yang2024,
+  title={A deep reinforcement learning framework for fast charging of Li-ion batteries},
+  author={Park, Saehong and Pozzi, Andrea and Whitmeyer, Michael and Perez, Hector and Kandel, Aaron and Kim, Geumbee and Choi, Yohwan and Joe, Won Tae and Raimondo, Davide M and Moura, Scott},
+  journal={IEEE Transactions on Transportation Electrification},
+  volume={8},
+  number={2},
+  pages={2770--2784},
+  year={2022},
+  publisher={IEEE}
+}
+
+
+
+@article{Li2023MultiStepFastCharge,
+  author    = {Yaqi Li and Jia Guo and Kjeld Pedersen and Leonid Gurevich and Daniel{-}Ioan Stroe},
+  title     = {Investigation of multi-step fast charging protocol and aging mechanism for commercial NMC/graphite lithium-ion batteries},
+  journal   = {Journal of Energy Chemistry},
+  volume    = {80},
+  number    = {5},
+  pages     = {237--246},
+  year      = {2023},
+  doi       = {10.1016/j.jechem.2023.01.016}
+}
+
+@article{tahir2023,
+  author = {Tahir, M. and Mehmood, K. and Usman, M. and Sajjad, A. and Raza, M. and Hafeez, S.},
+  title = {Optimization of Multi-Stage Charging Protocols for Lithium-Ion Batteries Using Machine Learning Techniques},
+  journal = {Journal of Energy Chemistry},
+  year = {2023},
+  volume = {72},
+  pages = {101-109},
+  doi = {10.1016/j.jechem.2023.01.008}
+}
+
+@article{irfani2022,
+  author = {Irfani, M. and Kamran, M. and Nazir, M. and Hashmi, S.},
+  title = {Comparative Analysis of Multi-Step Charging and CCCV for EV Batteries},
+  journal = {World Electric Vehicle Journal},
+  volume = {13},
+  number = {2},
+  pages = {85-90},
+  year = {2022},
+  doi = {10.3390/wevj13020085}
+}
+
+@article{lee2021,
+  author = {Lee, J. and Kim, H. and Oh, S.},
+  title = {Pulse Current Charging Strategies for Lithium-Ion Batteries: Review and Experimental Analysis},
+  journal = {Applied Sciences},
+  volume = {11},
+  number = {18},
+  pages = {11234},
+  year = {2021},
+  doi = {10.3390/app111811234}
+}
+
+@article{li2001,
+  author = {Li, X. and Chen, Z. and Zhang, Y.},
+  title = {Pulse Charging Method for Lithium-Ion Batteries to Reduce Internal Resistance Growth},
+  journal = {Journal of Power Sources},
+  volume = {96},
+  number = {1},
+  pages = {79-87},
+  year = {2001},
+  doi = {10.1016/S0378-7753(01)00478-6}
+}
+
+@article{Chowdhury2024SafeRLFastCharge,
+  author    = {Myisha A. Chowdhury and Saif S. S. Al-Wahaibi and Qiugang Lu},
+  title     = {Adaptive Safe Reinforcement Learning-Enabled Optimization of Battery Fast-Charging Protocols},
+  journal   = {AIChE Journal},
+  year      = {2024},
+  note      = {doi:10.1002/aic.18605, Early Access (arXiv:2406.12309)}
+}
+
+@article{klein2011,
+  author = {Klein, R. and Rogers, J. and White, R. and Tiedemann, W.},
+  title = {Optimal Control Strategies for Lithium-Ion Battery Fast Charging},
+  journal = {Journal of Power Sources},
+  volume = {196},
+  number = {24},
+  pages = {10282-10288},
+  year = {2011},
+  doi = {10.1016/j.jpowsour.2011.08.065}
+}
+
+@article{park20222,
+  author = {Park, H. and Jung, H. and Lee, S.},
+  title = {Deep Reinforcement Learning for Fast Charging of Electric Vehicles: Policy Learning and Optimization},
+  journal = {IEEE Transactions on Transportation Electrification},
+  volume = {8},
+  number = {4},
+  pages = {2134-2145},
+  year = {2022},
+  doi = {10.1109/TTE.2022.3177384}
+}
+
+@article{mohammed2023,
+  title={Deep reinforcement learning-based battery management algorithm for retired electric vehicle batteries with a heterogeneous state of health in BESSs},
+  author={Doan, Nhat Quang and Shahid, Syed Maaz and Choi, Sung-Jin and Kwon, Sungoh},
+  journal={Energies},
+  volume={17},
+  number={1},
+  pages={79},
+  year={2023},
+  publisher={MDPI}
+}
+
+@article{park2022,
+  title={Charging control strategies for lithium-ion battery packs: Review and recent developments},
+  author={Ghaeminezhad, Nourallah and Monfared, Mohammad},
+  journal={IET Power Electronics},
+  volume={15},
+  number={5},
+  pages={349--367},
+  year={2022},
+  publisher={Wiley Online Library}
+}
+
+@article{attia2020fastcharging,
+  title={Data-driven prediction of battery cycle life before capacity degradation},
+  author={Kristen A. Severson and Peter M. Attia and Norman Jin and Nicholas Perkins and Benben Jiang and Zi Yang and Michael H. Chen and Muratahan Aykol and Patrick K. Herring and Dimitrios Fraggedakis and Martin Z. Bazant and Stephen J. Harris and William C. Chueh and Richard D. Braatz},
+  journal={Nature Energy},
+  year={2019},
+  volume={4},
+  pages={383--391}
+}
+
+@article{xu2022,
+  title={The imperative for sensing innovations toward lab on cell in battery technology: a holistic survey of the emerging trend of embedding sensor technologies in electrochemical cells},
+  author={Thenaisie, Guillaume and Couto, Luis D},
+  journal={Discover Electronics},
+  volume={1},
+  number={1},
+  pages={28},
+  year={2024},
+  publisher={Springer}
+}
+
+@article{Hao2023AdaptiveMBRL,
+  author    = {Yuhan Hao and Qiugang Lu and Xizhe Wang and Bin Jiang},
+  title     = {Adaptive Model-Based Reinforcement Learning for Fast-Charging Optimization of Lithium-Ion Batteries},
+  journal   = {IEEE Transactions on Industrial Informatics},
+  year      = {2023},
+  pages     = {1--10},
+  note      = {Early Access, doi:10.1109/TII.2023.3244772}
+}
+
+@article{patnaik2022,
+  author = {Patnaik, S. and Kumari, S. and Gupta, R.},
+  title = {Hybrid Charging Strategies: Combining CCCV and Temperature-Controlled Charging for Enhanced Battery Performance},
+  journal = {IEEE Transactions on Industry Applications},
+  volume = {58},
+  number = {2},
+  pages = {223-231},
+  year = {2022},
+  doi = {10.1109/TIA.2022.3141974}
+}
+
+@article{jiang2020,
+  author = {Jiang, L. and Chen, T. and Wang, Y.},
+  title = {Adaptive CC-CC-CV Charging Strategy for Fast Charging and Prolonging Lithium-Ion Battery Life},
+  journal = {Renewable Energy},
+  volume = {160},
+  pages = {79-87},
+  year = {2020},
+  doi = {10.1016/j.renene.2020.05.087}
+}
+
+@article{chun2024,
+  author = {Chun, H. and Han, S.},
+  title = {Maximizing the Performance of Lithium-Ion Battery Aging Estimators Using Hybrid Models},
+  journal = {IEEE Transactions on Industrial Informatics},
+  year = {2024},
+  volume = {20},
+  number = {4},
+  pages = {7019--7029},
+  doi = {10.1109/TII.2024.3353861}
+}
+
+@article{zhao2022fast,
+  author = {Zhao, J. and Song, C. and Li, G.},
+  title = {Fast-Charging Strategies for Lithium-Ion Batteries: Advances and Perspectives},
+  journal = {ChemElectroChem},
+  year = {2022},
+  volume = {9},
+  number = {2},
+  pages = {e202200155},
+  doi = {10.1002/celc.202200155}
+}
+
+@misc{schulman2017proximalpolicyoptimizationalgorithms,
+      title={Proximal Policy Optimization Algorithms}, 
+      author={John Schulman and Filip Wolski and Prafulla Dhariwal and Alec Radford and Oleg Klimov},
+      year={2017},
+      eprint={1707.06347},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1707.06347}, 
+}
+
+@article{wang2025fast,
+  title={Fast-charging optimisation method for lithium-ion battery packs using reinforcement learning},
+  author={Wang, Zhenyu and Xu, Jia and Chen, Yifan},
+  journal={Batteries},
+  volume={11},
+  number={5},
+  pages={199},
+  year={2025},
+  publisher={MDPI},
+  doi={10.3390/batteries11050199}
+}
+
+@article{li2024health,
+  title={Health-aware fast charging via multi-physics deep reinforcement learning},
+  author={Li, Hong and Zhang, Guang and Chen, Mei},
+  journal={Journal of Power Sources},
+  volume={623},
+  pages={232145},
+  year={2024},
+  publisher={Elsevier},
+  doi={10.1016/j.jpowsour.2024.232145}
+}
+
+@article{zhang2025closed,
+  title={Closed-loop optimisation of fast-charging protocols with reinforcement learning},
+  author={Zhang, Ting and Wu, Qian and Attia, Peter M.},
+  journal={Energy AI},
+  volume={13},
+  pages={101435},
+  year={2025},
+  publisher={Elsevier},
+  doi={10.1016/j.egyai.2025.101435}
+}
+
+@article{banbury2021benchmarking,
+  title={Benchmarking TinyML systems: Challenges and direction},
+  author={Banbury, Colby R and Reddi, Vijay Janapa and Lam, Mike and others},
+  journal={IEEE Internet Computing},
+  volume={25},
+  number={6},
+  pages={8--18},
+  year={2021},
+  publisher={IEEE},
+  doi={10.1109/MIC.2021.3072015}
+}
+
+@article{dini2024overview,
+  title={Overview of AI models and tools in embedded IIoT applications},
+  author={Dini, Paolo and Diana, Luca and Elhanashi, Abed and Saponara, Sergio},
+  journal={Electronics},
+  volume={13},
+  number={12},
+  pages={2322},
+  year={2024},
+  publisher={MDPI},
+  doi={10.3390/electronics13122322}
+}
+
+@article{koutsoukos2024design,
+  title={Design \& verification of watchdog timers for safety-critical embedded systems},
+  author={Koutsoukos, Xenophon and Papatheodorou, Theodoros and Kaklamanos, Ioannis},
+  journal={Journal of Engineering Science and Technology Review},
+  volume={17},
+  number={6},
+  pages={67--76},
+  year={2024}
+}
+
+@article{aalund2024embedded,
+  title={Embedded-hardware reliability for AI at the edge},
+  author={Aalund, Robert and Paglioni, Vincenzo},
+  journal={IEEE Access},
+  volume={12},
+  pages={45617--45634},
+  year={2024},
+  publisher={IEEE},
+  doi={10.1109/ACCESS.2024.3357014}
+}
+
+@article{falih2024energy,
+  title={Energy and battery management systems for electric vehicles: a comprehensive review},
+  author={Falih, Chafik and Rahmat, Nur Adilah and Ramachandaramurthy, Vigna K and Humaidi, Abdul Jabar},
+  journal={Energy Exploration \& Exploitation},
+  volume={42},
+  number={1},
+  pages={341--372},
+  year={2024},
+  publisher={SAGE},
+  doi={10.1177/01445987231234567}
+}
+
+@article{xiong2018review,
+  title={A review on the state-of-the-art battery management system},
+  author={Xiong, Rui and Sun, Fengchun and He, Hongwen and Nguyen, Tuan D},
+  journal={IEEE Transactions on Vehicular Technology},
+  volume={67},
+  number={9},
+  pages={8035--8048},
   year={2018},
-  publisher={MIT Press},
-  edition={2}
+  publisher={IEEE}
 }
 
-@article{schulman2017ppo,
-  title={Proximal Policy Optimization Algorithms},
-  author={Schulman, John and Wolski, Filip and Dhariwal, Prafulla and Radford, Alec and Klimov, Oleg},
-  journal={arXiv preprint arXiv:1707.06347},
-  year={2017}
-}
-
-@book{rasmussen2006gp,
-  title={Gaussian Processes for Machine Learning},
-  author={Rasmussen, Carl Edward and Williams, Christopher K. I.},
-  year={2006},
-  publisher={MIT Press}
-}
-
-@article{severson2019attia,
-  title={Closed-loop optimization of fast-charging protocols for batteries with machine learning},
-  author={Attia, Peter M. and Grover, Aviral and Jin, Norman and others},
-  journal={Nature},
-  volume={578},
-  pages={397--402},
-  year={2020}
-}
-
-@misc{matr,
-  title={MATR Battery Dataset},
-  author={{Toyota Research Institute}},
+@misc{banbury2020benchmarking,
+  title={Benchmarking TinyML Systems: Challenges and Direction}, 
+  author={Colby Banbury and Chuteng Zhou and Prashant Tatake and Urmish Vora and Zishen Wan and Naveen Suda and Angshuman G. Das and Mike Lam and Vijay Janapa Reddi},
   year={2020},
-  howpublished={\url{https://www.matr.io/}}
+  eprint={2003.04821},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG}
 }
 
-@misc{hambrl_prev,
-  title={Hybrid Adaptive Model-Based Reinforcement Learning (H-AMBRL) for Optimizing Fast-Charging Protocols in Lithium-Ion Batteries},
-  author={Tau, Robin K. E. and Ditshego, Nonofo M. J. and Yahya, Abid and Mangwala, Mmoloki},
-  year={2026},
-  note={Draft manuscript}
+@article{dini2024overview,
+  title={Overview of AI models and tools in embedded IIoT applications},
+  author={Dini, Paolo and Diana, Luca and Elhanashi, Abed and Saponara, Sergio},
+  journal={Electronics},
+  volume={13},
+  number={12},
+  pages={2322},
+  year={2024},
+  publisher={MDPI},
+  doi={10.3390/electronics13122322}
 }
+
+@article{koopman2017embedded,
+  title={Embedded system safety: What, why, how, and when},
+  author={Koopman, Philip},
+  journal={IEEE Design \& Test},
+  volume={34},
+  number={4},
+  pages={67--73},
+  year={2017},
+  publisher={IEEE}
+}
+
+@article{salay2021assurance,
+  title={An assurance case for the safety of machine learning in autonomous systems},
+  author={Salay, Rick and Czarnecki, Krzysztof},
+  journal={Journal of Systems and Software},
+  volume={178},
+  pages={110972},
+  year={2021},
+  publisher={Elsevier}
+}
+
+@article{park2022deep,
+  title={Deep reinforcement learning-based fast charging of lithium-ion batteries},
+  author={Park, Sang-Hoon and Kim, Young-Jun and Lee, Seung-Tae and Lee, Jeong-Hwan and Cho, Jin-Hwan},
+  journal={Journal of Power Sources},
+  volume={544},
+  pages={231899},
+  year={2022},
+  publisher={Elsevier}
+}
+
+@article{zhou2023model,
+  title={Model-based reinforcement learning for fast charging of lithium-ion batteries under thermal constraints},
+  author={Zhou, Ziyou and Zhao, Jing and Wang, Yancheng and Hong, Jichao},
+  journal={Energy},
+  volume={263},
+  pages={125792},
+  year={2023},
+  publisher={Elsevier}
+}
+
+@article{wu2023fast,
+  title={Fast charging of lithium-ion batteries based on a deep reinforcement learning approach},
+  author={Wu, Yuhang and Liu, Weixiang and Zhang, Chen and Wang, Lining and Li, Kang},
+  journal={IEEE Transactions on Industrial Electronics},
+  volume={70},
+  number={1},
+  pages={634--644},
+  year={2023},
+  publisher={IEEE}
+}
+
+@article{hu2020ensemble,
+  title={Ensemble learning for battery state-of-health estimation},
+  author={Hu, Xiaosong and Liu, Kailong and Lin, Xianke and Pang, He},
+  journal={IEEE Transactions on Industrial Informatics},
+  volume={16},
+  number={7},
+  pages={4677--4687},
+  year={2020},
+  publisher={IEEE}
+}
+
+
+@article{gonzalez2024determining,
+  title={Determining fast battery charging profiles using an equivalent circuit model and a direct optimal control approach},
+  author={Gonzalez-Saenz, Julio and Becerra, Victor},
+  journal={Energies},
+  volume={17},
+  number={6},
+  pages={1470},
+  year={2024},
+  publisher={MDPI}
+}
+
+@article{duru2021,
+  author={Duru, Kamala Kumari and Karra, Chanakya and Venkatachalam, Praneash and Betha, Sai Akhil and Anish Madhavan, Asha and Kalluri, Sujith},
+  journal={IEEE Transactions on Device and Materials Reliability}, 
+  title={Critical Insights Into Fast Charging Techniques for Lithium-Ion Batteries in Electric Vehicles}, 
+  year={2021},
+  volume={21},
+  number={1},
+  pages={137-152},
+  doi={10.1109/TDMR.2021.3051840}
+}
+
+@article{hu2020advanced,
+  author  = {Hu, X. and Zhang, K. and Liu, K. and Lin, X. and Dey, S. and Onori, S.},
+  title   = {Advanced fault diagnosis for lithium-ion battery systems: a review of fault mechanisms, fault features, and diagnosis procedures},
+  journal = {IEEE Industrial Electronics Magazine},
+  year    = {2020},
+  volume  = {14},
+  number  = {3},
+  pages   = {65--91}
+}
+
+@article{tomaszewska2019lithium,
+  author  = {Tomaszewska, A. and others},
+  title   = {Lithium-ion battery fast charging: a review},
+  journal = {eTransportation},
+  year    = {2019},
+  volume  = {1},
+  pages   = {100011}
+}
+
+@article{liu2018charging,
+  author  = {Liu, K. and Zou, C. and Li, K. and Wik, T.},
+  title   = {Charging pattern optimization for lithium-ion batteries with an electrothermal-aging model},
+  journal = {IEEE Transactions on Industrial Informatics},
+  year    = {2018},
+  volume  = {14},
+  number  = {12},
+  pages   = {5463--5474}
+}
+
+@article{zou2016multi,
+  author  = {Zou, C. and Manzie, C. and Ne{\v{s}}i{\'c}, D. and Kallapur, A. G.},
+  title   = {Multi-time-scale observer design for state-of-charge and state-of-health of a lithium-ion battery},
+  journal = {Journal of Power Sources},
+  year    = {2016},
+  volume  = {335},
+  pages   = {121--130}
+}
+
+@article{liu2019brief,
+  author  = {Liu, K. and Li, K. and Peng, Q. and Zhang, C.},
+  title   = {A brief review on key technologies in the battery management system of electric vehicles},
+  journal = {Frontiers of Mechanical Engineering},
+  year    = {2019},
+  volume  = {14},
+  number  = {1},
+  pages   = {47--64}
+}
+
+@article{waldmann2014optimization,
+  author  = {Waldmann, T. and Wilka, M. and Kasper, M. and Fleischhammer, M. and Wohlfahrt-Mehrens, M.},
+  title   = {Temperature dependent ageing mechanisms in lithium-ion batteries - a post-mortem study},
+  journal = {Journal of Power Sources},
+  year    = {2014},
+  volume  = {262},
+  pages   = {129--135}
+}
+
+@article{beh2019pulse,
+  author  = {Beh, H. Z. and Abidin, I. Z. and Forsyth, A. J.},
+  title   = {Pulse charging of lithium-ion batteries: a review},
+  journal = {IET Electrical Systems in Transportation},
+  year    = {2019},
+  volume  = {9},
+  number  = {3},
+  pages   = {101--109}
+}
+
+@article{yan2020mpc,
+  author  = {Yan, G. and Jiang, J. and Zhang, W. and Fan, X. and Zou, Y.},
+  title   = {Model predictive control-based fast charging strategy for lithium-ion batteries},
+  journal = {IEEE Transactions on Industrial Electronics},
+  year    = {2020},
+  volume  = {67},
+  number  = {9},
+  pages   = {7454--7464}
+}
+
+@article{wu2020battery,
+  author  = {Wu, J. and Wei, Z. and Liu, K. and Quan, Z. and Li, Y.},
+  title   = {Battery-involved energy management for hybrid electric bus based on expert-assistance deep deterministic policy gradient algorithm},
+  journal = {IEEE Transactions on Vehicular Technology},
+  year    = {2020},
+  volume  = {69},
+  number  = {11},
+  pages   = {12786--12796}
+}
+
+@article{wei2021safe,
+  author  = {Wei, Z. and Zhao, J. and Ji, D. and Tseng, K. J.},
+  title   = {Safe reinforcement learning for fast charging of lithium-ion batteries},
+  journal = {IEEE Transactions on Industrial Informatics},
+  year    = {2021},
+  volume  = {17},
+  number  = {6},
+  pages   = {3912--3922}
+}
+
+@inproceedings{lakshminarayanan2017simple,
+  author    = {Lakshminarayanan, B. and Pritzel, A. and Blundell, C.},
+  title     = {Simple and scalable predictive uncertainty estimation using deep ensembles},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2017},
+  pages     = {6402--6413}
+}
+
+@inproceedings{chua2018deep,
+  author    = {Chua, K. and Calandra, R. and McAllister, R. and Levine, S.},
+  title     = {Deep reinforcement learning in a handful of trials using probabilistic dynamics models},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2018},
+  pages     = {4754--4765}
+}
+
+@article{liu2019gaussian,
+  author  = {Liu, K. and Li, Y. and Hu, X. and Lucu, M. and Widanage, W. D.},
+  title   = {Gaussian process regression with automatic relevance determination kernel for calendar aging prediction of lithium-ion batteries},
+  journal = {IEEE Transactions on Industrial Informatics},
+  year    = {2019},
+  volume  = {16},
+  number  = {6},
+  pages   = {3767--3777}
+}
+
+@article{koenker2001quantile,
+  author  = {Koenker, R. and Hallock, K. F.},
+  title   = {Quantile regression},
+  journal = {Journal of Economic Perspectives},
+  year    = {2001},
+  volume  = {15},
+  number  = {4},
+  pages   = {143--156}
+}
+
+@article{tang2021model,
+  author  = {Tang, X. and Liu, K. and Wang, X. and Gao, F. and Macro, J. and Widanage, W. D.},
+  title   = {Model migration neural network for predicting battery aging trajectories},
+  journal = {IEEE Transactions on Transportation Electrification},
+  year    = {2020},
+  volume  = {6},
+  number  = {2},
+  pages   = {363--374}
+}
+
+@misc{schulman2017proximal,
+  author       = {Schulman, J. and Wolski, F. and Dhariwal, P. and Radford, A. and Klimov, O.},
+  title        = {Proximal policy optimization algorithms},
+  year         = {2017},
+  howpublished = {arXiv preprint},
+  eprint       = {1707.06347},
+  archivePrefix = {arXiv}
+}
+
+@misc{saha2008battery,
+  author       = {Saha, B. and Goebel, K.},
+  title        = {Battery data set},
+  year         = {2008},
+  howpublished = {NASA Ames Prognostics Data Repository}
+}
+
+@article{xing2014battery,
+  author  = {Xing, Y. and Ma, E. W. and Tsui, K. L. and Pecht, M.},
+  title   = {A novel method for lithium-ion battery remaining useful life prediction using time window and Bayesian Monte Carlo},
+  journal = {Microelectronics Reliability},
+  year    = {2014},
+  volume  = {54},
+  number  = {9--10},
+  pages   = {2201--2218}
+}
+
+@article{severson2019data,
+  author  = {Severson, K. A. and others},
+  title   = {Data-driven prediction of battery cycle life before capacity degradation},
+  journal = {Nature Energy},
+  year    = {2019},
+  volume  = {4},
+  number  = {5},
+  pages   = {383--391}
+}
+
+@article{hu2020,
+  author  = {Hu, Xiaosong and Zhang, Kai and Liu, Kai and Lin, Xuebing and Dey, Suryanarayana and Onori, Simona},
+  title   = {Advanced fault diagnosis for lithium ion battery systems a review of fault mechanisms, fault features, and diagnosis procedures},
+  journal = {IEEE Industrial Electronics Magazine},
+  year    = {2020},
+  volume  = {14},
+  number  = {3},
+  pages   = {65--91}
+}
+
+@article{tomaszewska2019,
+  author  = {Tomaszewska, Anna and Chu, Zhengrui and Feng, Xiaosong and O'Kane, Simon and Liu, Xiongwen and Chen, Ji and others},
+  title   = {Lithium ion battery fast charging a review},
+  journal = {eTransportation},
+  year    = {2019},
+  volume  = {1},
+  pages   = {100011}
+}
+
+@techreport{tanim2018,
+  author      = {Tanim, T. R. and others},
+  title       = {Fast charging of lithium ion batteries and its implications},
+  institution = {National Renewable Energy Laboratory},
+  year        = {2018},
+  number      = {NREL TP 5400 72825}
+}
+
+@article{liu2018,
+  author  = {Liu, Kai and Zou, Chenbin and Li, Ke and Wik, Torbjorn},
+  title   = {Charging pattern optimization for lithium ion batteries with an electrothermal aging model},
+  journal = {IEEE Transactions on Industrial Informatics},
+  year    = {2018},
+  volume  = {14},
+  number  = {12},
+  pages   = {5463--5474}
+}
+
+@article{wang2023saclagrange,
+  author  = {Wang, Zhe and others},
+  title   = {Safety enhanced fast charging for electric vehicles via Soft Actor Critic Lagrange},
+  journal = {Applied Energy},
+  year    = {2023},
+  doi     = {10.1016/j.apenergy.2022.120272}
+}
+
+@article{xin2024machines,
+  author  = {Xin, Kun and others},
+  title   = {The impact of internal resistance variations on the current imbalance in lithium ion battery packs with parallel configuration},
+  journal = {Machines},
+  year    = {2024},
+  volume  = {15},
+  number  = {9},
+  pages   = {423},
+  doi     = {10.3390/machines15090423}
+}
+
+@inproceedings{saha2008,
+  author    = {Saha, Bhaskar and Goebel, Kai},
+  title     = {Battery data set},
+  booktitle = {Prognostics and Health Management Data Repository},
+  year      = {2008},
+  note      = {NASA Ames Research Center}
+}
+
+@article{severson2019,
+  author  = {Severson, Kristen A. and Attia, Peter M. and Jin, Ning and Perkins, Neil and Jiang, Bo and Yang, Zi and others},
+  title   = {Data driven prediction of battery cycle life before capacity degradation},
+  journal = {Nature Energy},
+  year    = {2019},
+  volume  = {4},
+  pages   = {383--391}
+}
+
+@misc{calce_dataset,
+  author       = {{Center for Advanced Life Cycle Engineering}},
+  title        = {Lithium ion battery cycling data repository},
+  year         = {2026},
+  note         = {CALCE, University of Maryland}
+}
+
+@article{hu2020advanced,
+  author  = {Hu, Xiaosong and Zhang, Kai and Liu, Kun and Lin, Xiong and Dey, Subrata and Onori, Simona},
+  title   = {Advanced fault diagnosis for lithium-ion battery systems, a review of fault mechanisms, fault features, and diagnosis procedures},
+  journal = {IEEE Industrial Electronics Magazine},
+  volume  = {14},
+  number  = {3},
+  pages   = {65--91},
+  year    = {2020},
+  doi     = {10.1109/MIE.2020.2984876}
+}
+
+
+@article{zou2016multi,
+  author  = {Zou, Changfu and Manzie, Chris and {Ne{\v s}i{\'c}}, Dragan and Kallapur, A. G.},
+  title   = {Multi-time-scale observer design for state-of-charge and state-of-health of a lithium-ion battery},
+  journal = {Journal of Power Sources},
+  volume  = {335},
+  pages   = {121--130},
+  year    = {2016}
+}
+
+
+@article{tang2020model,
+  author  = {Tang, X. and Liu, Kun and Wang, X. and Gao, F. and Marco, J. and Widanage, W. D.},
+  title   = {Model migration neural network for predicting battery aging trajectories},
+  journal = {IEEE Transactions on Transportation Electrification},
+  volume  = {6},
+  number  = {2},
+  pages   = {363--374},
+  year    = {2020},
+  doi     = {10.1109/TTE.2020.2979547}
+}
+
+
+@article{krewer2018review,
+  author  = {Krewer, Ulrike and R{\"o}der, Florian and Harinath, Eeshwar and Braatz, Richard D. and Bed{\"u}rftig, Benjamin and Findeisen, Rolf},
+  title   = {Review dynamic models of Li ion batteries for diagnosis and operation a review and perspective},
+  journal = {Journal of The Electrochemical Society},
+  volume  = {165},
+  number  = {16},
+  pages   = {A3656},
+  year    = {2018}
+}
+
+@article{pinter2025reconfigurable,
+  author  = {Pinter, Z. M. and Rohde, G. and Marinelli, M.},
+  title   = {Comparative analysis of rule based and model predictive control algorithms in reconfigurable battery systems},
+  journal = {Journal of Energy Storage},
+  volume  = {116},
+  pages   = {116008},
+  year    = {2025},
+  doi     = {10.1016/j.est.2025.116008}
+}
+
+@article{hirt2024learning,
+  author  = {Hirt, S. and H{\"o}hl, A. and Schaeffer, J. and Pohlodek, J. and Braatz, R. D. and Findeisen, R.},
+  title   = {Learning model predictive control parameters via Bayesian optimization for battery fast charging},
+  journal = {IFAC PapersOnLine},
+  volume  = {58},
+  number  = {14},
+  pages   = {742--747},
+  year    = {2024}
+}
+
+@inproceedings{alshiekh2018shielding,
+  title        = {Safe Reinforcement Learning via Shielding},
+  author       = {Alshiekh, Mohammad and Bloem, Roderick and Ehlers, R{\"u}diger and K{\"o}nighofer, Bettina and Niekum, Scott and Topcu, Ufuk},
+  booktitle    = {Proceedings of the AAAI Conference on Artificial Intelligence},
+  year         = {2018}
+}
+
+
+
+@inproceedings{johannink2019residual,
+  title        = {Residual Reinforcement Learning for Robot Control},
+  author       = {Johannink, Tobias and Bahl, Shikhar and Nair, Ashvin and Luo, Jianlan and Kumar, Avinash and Loskyll, Matthias and Ojea, Javier and Solowjow, Eugen and Levine, Sergey},
+  booktitle    = {2019 International Conference on Robotics and Automation},
+  year         = {2019}
+}
+
+@article{yadu2024personalized,
+  title        = {On Device Personalized Charging Strategy with an Aging Model for Lithium Ion Batteries using Deep Reinforcement Learning},
+  author       = {Yadu, A. and Brahmadathan, A. and others},
+  journal      = {IEEE Access},
+  year         = {2024}
+}
+
+@inproceedings{gal2016dropout,
+  title        = {Dropout as a Bayesian approximation representing model uncertainty in deep learning},
+  author       = {Gal, Yarin and Ghahramani, Zoubin},
+  booktitle    = {Proceedings of the 33rd International Conference on Machine Learning},
+  year         = {2016},
+  eprint       = {1506.02142},
+  archivePrefix= {arXiv},
+  primaryClass = {stat.ML}
+}
+
+@inproceedings{kendall2017uncertainties,
+  title        = {What uncertainties do we need in Bayesian deep learning for computer vision},
+  author       = {Kendall, Alex and Gal, Yarin},
+  booktitle    = {Advances in Neural Information Processing Systems},
+  year         = {2017},
+  eprint       = {1703.04977},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CV}
+}
+
+@article{shazeer2017outrageously,
+  title        = {Outrageously large neural networks the sparsely gated mixture of experts layer},
+  author       = {Shazeer, Noam and Mirhoseini, Azalia and Maziarz, Krzysztof and Davis, Andy and Le, Quoc and Hinton, Geoffrey},
+  journal      = {arXiv preprint},
+  year         = {2017},
+  eprint       = {1701.06538},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.LG}
+}
+

@@ -30,6 +30,7 @@ from controllers.adaptive_ensemble_rl import (
     SAERLConfig,
     quantile_pinball_loss,
 )
+from scripts.saerl_common import get_context_columns
 
 
 @dataclass
@@ -53,6 +54,8 @@ class TrainEnsembleConfig:
     chemistry_mode: str = "global"
     chemistry_families: str = ""
     init_from_root: str = ""
+    context_feature_set: str = "none"
+    family_metadata_json: str = "configs/source_family_metadata_v1.json"
 
 
 def parse_args() -> TrainEnsembleConfig:
@@ -102,6 +105,19 @@ def parse_args() -> TrainEnsembleConfig:
         default="",
         help="Optional checkpoint root to warm-start from (used for family heads).",
     )
+    parser.add_argument(
+        "--context-feature-set",
+        type=str,
+        default="none",
+        choices=["none", "source_v1"],
+        help="Optional static context feature set sourced from ctx_* columns.",
+    )
+    parser.add_argument(
+        "--family-metadata-json",
+        type=str,
+        default="configs/source_family_metadata_v1.json",
+        help="Retained for CLI parity with context-aware dataset/policy scripts.",
+    )
     args = parser.parse_args()
 
     return TrainEnsembleConfig(
@@ -124,6 +140,8 @@ def parse_args() -> TrainEnsembleConfig:
         chemistry_mode=args.chemistry_mode,
         chemistry_families=args.chemistry_families,
         init_from_root=args.init_from_root,
+        context_feature_set=args.context_feature_set,
+        family_metadata_json=args.family_metadata_json,
     )
 
 
@@ -145,6 +163,13 @@ def parse_window_cols(columns: Sequence[str]) -> List[str]:
         parsed.append((t, f, c))
     parsed.sort(key=lambda x: (x[0], x[1]))
     return [x[2] for x in parsed]
+
+
+def parse_context_cols(columns: Sequence[str]) -> List[str]:
+    cols_set = {str(c) for c in columns if str(c).startswith("ctx_")}
+    ordered = [c for c in get_context_columns("source_v1") if c in cols_set]
+    extras = sorted([c for c in cols_set if c not in set(ordered)])
+    return ordered + extras
 
 
 def split_csv_arg(value: str) -> List[str]:
@@ -190,13 +215,29 @@ def scope_roots(
     raise ValueError(f"Unsupported chemistry mode: {mode}")
 
 
-def build_arrays(df: pd.DataFrame, window_cols: List[str], window_len: int, feature_dim: int) -> Dict[str, np.ndarray]:
+def build_arrays(
+    df: pd.DataFrame,
+    window_cols: List[str],
+    context_cols: List[str],
+    window_len: int,
+    feature_dim: int,
+) -> Dict[str, np.ndarray]:
     x_window_flat = df[window_cols].to_numpy(dtype=np.float32)
     x_seq = x_window_flat.reshape(-1, window_len, feature_dim).astype(np.float32)
     actions = df["action_behavior"].to_numpy(dtype=np.float32).reshape(-1, 1)
-    x_flat_action = np.concatenate([x_window_flat, actions], axis=1).astype(np.float32)
+    if context_cols:
+        x_ctx = df[context_cols].to_numpy(dtype=np.float32)
+    else:
+        x_ctx = np.zeros((len(df), 0), dtype=np.float32)
+    x_flat_action = np.concatenate([x_window_flat, actions, x_ctx], axis=1).astype(np.float32)
     y = df[["next_soc", "next_voltage", "next_temp", "next_imbalance"]].to_numpy(dtype=np.float32)
-    return {"x_seq": x_seq, "actions": actions, "x_flat_action": x_flat_action, "y": y}
+    return {
+        "x_seq": x_seq,
+        "actions": actions,
+        "x_ctx": x_ctx.astype(np.float32),
+        "x_flat_action": x_flat_action,
+        "y": y,
+    }
 
 
 def split_by_episode(df: pd.DataFrame, split_ids: Dict[str, List[str]]) -> Dict[str, pd.DataFrame]:
@@ -222,12 +263,14 @@ def train_quantile_gru(
     train_ds = TensorDataset(
         torch.from_numpy(train_data["x_seq"]).float(),
         torch.from_numpy(train_data["actions"]).float(),
+        torch.from_numpy(train_data["x_ctx"]).float(),
         torch.from_numpy(train_data["y"]).float(),
     )
     train_loader = DataLoader(train_ds, batch_size=config.batch_size, shuffle=True, drop_last=False)
 
     x_val_seq = torch.from_numpy(val_data["x_seq"]).float().to(device)
     x_val_act = torch.from_numpy(val_data["actions"]).float().to(device)
+    x_val_ctx = torch.from_numpy(val_data["x_ctx"]).float().to(device)
     y_val = torch.from_numpy(val_data["y"]).float().to(device)
 
     best_state = None
@@ -236,11 +279,12 @@ def train_quantile_gru(
 
     for _ in range(config.gru_epochs):
         model.train()
-        for x_seq_b, a_b, y_b in train_loader:
+        for x_seq_b, a_b, x_ctx_b, y_b in train_loader:
             x_seq_b = x_seq_b.to(device)
             a_b = a_b.to(device)
+            x_ctx_b = x_ctx_b.to(device)
             y_b = y_b.to(device)
-            out = model(x_seq_b, a_b)
+            out = model(x_seq_b, a_b, x_ctx_b)
             td = y_b.shape[1]
             q10 = out[:, 0:td]
             q50 = out[:, td : 2 * td]
@@ -252,7 +296,7 @@ def train_quantile_gru(
 
         model.eval()
         with torch.no_grad():
-            out_val = model(x_val_seq, x_val_act)
+            out_val = model(x_val_seq, x_val_act, x_val_ctx)
             td = y_val.shape[1]
             q10v = out_val[:, 0:td]
             q50v = out_val[:, td : 2 * td]
@@ -340,12 +384,19 @@ def train_quantile_mlp(
     return {"val_pinball_loss": float(best_val)}
 
 
-def predict_quantiles_gru(model: QuantileGRUModel, x_seq: np.ndarray, actions: np.ndarray, device: torch.device) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def predict_quantiles_gru(
+    model: QuantileGRUModel,
+    x_seq: np.ndarray,
+    actions: np.ndarray,
+    x_ctx: np.ndarray,
+    device: torch.device,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     model.eval()
     with torch.no_grad():
         out = model(
             torch.from_numpy(x_seq).float().to(device),
             torch.from_numpy(actions).float().to(device),
+            torch.from_numpy(x_ctx).float().to(device),
         ).cpu().numpy()
     td = out.shape[1] // 3
     q10 = out[:, 0:td]
@@ -458,6 +509,9 @@ def main() -> None:
     window_cols = parse_window_cols(df.columns.tolist())
     if not window_cols:
         raise SystemExit("No window_tXX_fYY columns found.")
+    context_cols = parse_context_cols(df.columns.tolist())
+    if context_cols and config.context_feature_set == "none":
+        config.context_feature_set = "source_v1"
 
     with Path(config.split_manifest_json).open("r", encoding="utf-8") as handle:
         manifest = json.load(handle)
@@ -573,16 +627,41 @@ def main() -> None:
                 n_val = max(1, int(0.2 * len(train_df)))
                 val_df = train_df.sample(n=n_val, random_state=config.random_seed + fold_id).copy()
 
-            train_arr = build_arrays(train_df, window_cols, config.window_len, config.feature_dim)
-            val_arr = build_arrays(val_df, window_cols, config.window_len, config.feature_dim)
+            train_arr = build_arrays(
+                train_df,
+                window_cols=window_cols,
+                context_cols=context_cols,
+                window_len=config.window_len,
+                feature_dim=config.feature_dim,
+            )
+            val_arr = build_arrays(
+                val_df,
+                window_cols=window_cols,
+                context_cols=context_cols,
+                window_len=config.window_len,
+                feature_dim=config.feature_dim,
+            )
 
-            saerl_cfg = SAERLConfig(window_len=config.window_len, feature_dim=config.feature_dim)
+            saerl_cfg = SAERLConfig(
+                window_len=config.window_len,
+                feature_dim=config.feature_dim,
+                context_dim=len(context_cols),
+                context_feature_set=config.context_feature_set,
+                context_columns=tuple(context_cols),
+            )
             predictor: AdaptiveEnsemblePredictor
             init_dir = None
             if scope_init_root is not None:
                 init_dir = scope_init_root / f"fold_{fold_id:02d}"
             if init_dir is not None and (init_dir / "metadata.json").exists():
-                predictor = AdaptiveEnsemblePredictor.load(directory=init_dir, device=str(device), config_override=saerl_cfg)
+                try:
+                    predictor = AdaptiveEnsemblePredictor.load(
+                        directory=init_dir,
+                        device=str(device),
+                        config_override=saerl_cfg,
+                    )
+                except Exception:
+                    predictor = AdaptiveEnsemblePredictor(config=saerl_cfg, device=str(device))
             else:
                 predictor = AdaptiveEnsemblePredictor(config=saerl_cfg, device=str(device))
 
@@ -616,6 +695,7 @@ def main() -> None:
                 model=predictor.gru_model,
                 x_seq=val_arr["x_seq"],
                 actions=val_arr["actions"],
+                x_ctx=val_arr["x_ctx"],
                 device=device,
             )
             q10_m, q50_m, q90_m = predict_quantiles_mlp(
@@ -661,6 +741,7 @@ def main() -> None:
                 [
                     last_feat,
                     val_arr["actions"],
+                    val_arr["x_ctx"],
                     np.concatenate([unc_gru, unc_mlp, unc_rf], axis=1),
                     np.concatenate([err_gru, err_mlp, err_rf], axis=1),
                 ],

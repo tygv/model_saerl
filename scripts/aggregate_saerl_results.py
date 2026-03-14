@@ -65,6 +65,9 @@ def collect_metrics(input_root: Path) -> pd.DataFrame:
             "horizon_ideal_cc_time_to_target_s": horizon_info.get("ideal_cc_time_to_target_s", np.nan),
             "horizon_feasibility_ratio_vs_base": horizon_info.get("current_feasibility_ratio_vs_base_horizon", np.nan),
         }
+        for key, value in payload.items():
+            if str(key).startswith("ctx_"):
+                row[str(key)] = value
         for k, v in metrics.items():
             row[k] = v
         if not row["controller_chemistry_mode"]:
@@ -478,6 +481,44 @@ def main() -> None:
                     output_root / "acceptance_feasible_effective_by_objective.csv",
                     index=False,
                 )
+        if "ctx_regime_aging_eis" in accept_df.columns:
+            def _regime_label(row: pd.Series) -> str:
+                if bool(row.get("ctx_regime_aging_eis", 0)):
+                    return "aging_eis"
+                if bool(row.get("ctx_regime_cycle_cccv", 0)):
+                    return "cycle_cccv"
+                if bool(row.get("ctx_regime_fast_charge", 0)):
+                    return "fast_charge"
+                return "unknown"
+
+            accept_df["test_regime"] = accept_df.apply(_regime_label, axis=1)
+            aggregate_by_regime = (
+                accept_df.groupby(["dataset_family", "test_regime"])["scenario_pass"]
+                .agg(["count", "sum", "mean"])
+                .rename(columns={"count": "n_scenarios", "sum": "pass_count", "mean": "pass_rate"})
+                .reset_index()
+            )
+            aggregate_by_regime.to_csv(output_root / "aggregate_by_regime.csv", index=False)
+        if "ctx_source_temp_present" in accept_df.columns:
+            temp_series = accept_df["ctx_source_temp_present"].astype(float)
+            if "ctx_source_internal_resistance_present" in accept_df.columns:
+                ir_series = accept_df["ctx_source_internal_resistance_present"].astype(float)
+            else:
+                ir_series = pd.Series(np.zeros(len(accept_df), dtype=float), index=accept_df.index)
+            aggregate_by_signal = (
+                accept_df.assign(
+                    source_temp_present=temp_series > 0.5,
+                    source_internal_resistance_present=ir_series > 0.5,
+                )
+                .groupby(["dataset_family", "source_temp_present", "source_internal_resistance_present"])["scenario_pass"]
+                .agg(["count", "sum", "mean"])
+                .rename(columns={"count": "n_scenarios", "sum": "pass_count", "mean": "pass_rate"})
+                .reset_index()
+            )
+            aggregate_by_signal.to_csv(
+                output_root / "aggregate_by_source_signal_availability.csv",
+                index=False,
+            )
 
     plot_pareto(primary_df=primary_df, output_path=figures_root / "01_controller_pareto")
     pass_heat = plot_pass_heatmap(accept_df=accept_df, output_path=figures_root / "02_pass_rate_heatmap")

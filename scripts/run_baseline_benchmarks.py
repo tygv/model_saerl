@@ -116,6 +116,7 @@ class BenchmarkConfig:
     standardized_root: str = "data/standardized"
     params_root: str = "data/standardized_params"
     dataset_families: str = "nasa,calce,matr"
+    exclude_dataset_cases: str = ""
     max_files_per_dataset: int = 1
     data_is_cell_level: bool = True
     include_cell_figures: bool = False
@@ -123,6 +124,7 @@ class BenchmarkConfig:
     min_episode_minutes: float = 120.0
     feasible_time_slack: float = 1.35
     max_steps_cap: int = 5000
+    nasa_impedance_root: str = "data/standardized/nasa_impedance"
 
 
 class CCCVController:
@@ -673,6 +675,22 @@ def _split_csv_arg(value: str) -> List[str]:
     return [item.strip().lower() for item in str(value).split(",") if item.strip()]
 
 
+def _parse_case_filter_arg(value: str) -> set[Tuple[str, str]]:
+    out: set[Tuple[str, str]] = set()
+    for token in str(value).split(","):
+        raw = str(token).strip()
+        if not raw:
+            continue
+        family, sep, case_id = raw.partition("/")
+        if not sep:
+            continue
+        fam = family.strip().lower()
+        case = case_id.strip().lower()
+        if fam and case:
+            out.add((fam, case))
+    return out
+
+
 def _load_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
@@ -680,6 +698,70 @@ def _load_json(path: Path) -> Dict[str, Any]:
 
 def _coerce_numeric(series: pd.Series) -> pd.Series:
     return pd.to_numeric(series, errors="coerce")
+
+
+def _first_present_column(columns: Iterable[str], candidates: Iterable[str]) -> Optional[str]:
+    available = set(columns)
+    for name in candidates:
+        if name in available:
+            return str(name)
+    return None
+
+
+def _series_quantile_stats(series: Optional[pd.Series]) -> Tuple[int, float, float]:
+    if series is None:
+        return 0, float("nan"), float("nan")
+    numeric = _coerce_numeric(series).dropna()
+    if numeric.empty:
+        return 0, float("nan"), float("nan")
+    arr = numeric.to_numpy(dtype=float)
+    return int(len(arr)), float(np.nanmedian(arr)), float(np.nanquantile(arr, 0.95))
+
+
+def _derive_nasa_impedance_profile(csv_path: Path) -> Dict[str, float]:
+    if not csv_path.exists():
+        return {
+            "source_nasa_impedance_present": 0.0,
+            "source_nasa_rectified_impedance_median_ohm": float("nan"),
+            "source_nasa_rectified_impedance_q95_ohm": float("nan"),
+        }
+    try:
+        header_cols = pd.read_csv(csv_path, nrows=0).columns.tolist()
+    except Exception:
+        return {
+            "source_nasa_impedance_present": 0.0,
+            "source_nasa_rectified_impedance_median_ohm": float("nan"),
+            "source_nasa_rectified_impedance_q95_ohm": float("nan"),
+        }
+    imp_col = _first_present_column(
+        header_cols,
+        [
+            "Rectified_Impedance_abs",
+            "Rectified_Impedance",
+            "Battery_impedance_abs",
+            "Battery_impedance",
+        ],
+    )
+    if imp_col is None:
+        return {
+            "source_nasa_impedance_present": 0.0,
+            "source_nasa_rectified_impedance_median_ohm": float("nan"),
+            "source_nasa_rectified_impedance_q95_ohm": float("nan"),
+        }
+    try:
+        data = pd.read_csv(csv_path, usecols=[imp_col], low_memory=False)
+    except Exception:
+        return {
+            "source_nasa_impedance_present": 0.0,
+            "source_nasa_rectified_impedance_median_ohm": float("nan"),
+            "source_nasa_rectified_impedance_q95_ohm": float("nan"),
+        }
+    count, median_v, q95_v = _series_quantile_stats(data[imp_col])
+    return {
+        "source_nasa_impedance_present": 1.0 if count > 0 else 0.0,
+        "source_nasa_rectified_impedance_median_ohm": median_v,
+        "source_nasa_rectified_impedance_q95_ohm": q95_v,
+    }
 
 
 def derive_data_profile(
@@ -692,7 +774,18 @@ def derive_data_profile(
     if not set(required).issubset(set(header_cols)):
         missing = [col for col in required if col not in header_cols]
         raise ValueError(f"{csv_path} missing required columns: {missing}")
-    usecols = [col for col in ["time", "pack_voltage", "pack_current", "pack_temperature"] if col in header_cols]
+    optional_cols = [
+        "pack_temperature",
+        "Cycle_Index",
+        "cycle_index",
+        "Step_Index",
+        "step_index",
+        "Internal_Resistance(Ohm)",
+        "internal_resistance",
+        "AC_Impedance(Ohm)",
+        "ac_impedance",
+    ]
+    usecols = [col for col in ["time", "pack_voltage", "pack_current"] + optional_cols if col in header_cols]
     data = pd.read_csv(csv_path, usecols=usecols, low_memory=False)
     if len(data) > 120000:
         stride = max(1, len(data) // 120000)
@@ -717,6 +810,8 @@ def derive_data_profile(
     dt_candidates = dt_candidates[np.isfinite(dt_candidates) & (dt_candidates > 0)]
     dt_s = float(np.median(dt_candidates)) if dt_candidates.size else 1.0
     dt_s = float(np.clip(dt_s, 0.1, 30.0))
+    dt_q95_s = float(np.nanquantile(dt_candidates, 0.95)) if dt_candidates.size else dt_s
+    dt_q95_s = float(np.clip(dt_q95_s, 0.1, 300.0))
 
     v_q01 = float(np.nanquantile(voltage_v, 0.01))
     v_q50 = float(np.nanquantile(voltage_v, 0.50))
@@ -735,7 +830,10 @@ def derive_data_profile(
         initial_soc = float(np.clip(default_initial_soc, 0.05, 0.95))
 
     if "pack_temperature" in data.columns:
-        temp_valid = data["pack_temperature"].dropna()
+        temp_series = data["pack_temperature"]
+        temp_valid = temp_series.dropna()
+        source_temp_present = 1.0 if len(temp_valid) else 0.0
+        source_temp_missing_frac = float(temp_series.isna().mean())
         if len(temp_valid):
             ambient_temp_c = float(temp_valid.median())
             initial_temp_c = float(temp_valid.iloc[0])
@@ -745,9 +843,26 @@ def derive_data_profile(
     else:
         ambient_temp_c = float(default_ambient_temp_c)
         initial_temp_c = float(default_ambient_temp_c)
+        source_temp_present = 0.0
+        source_temp_missing_frac = 1.0
+
+    cycle_col = _first_present_column(data.columns, ["Cycle_Index", "cycle_index"])
+    step_col = _first_present_column(data.columns, ["Step_Index", "step_index"])
+    ir_col = _first_present_column(data.columns, ["Internal_Resistance(Ohm)", "internal_resistance"])
+    ac_col = _first_present_column(data.columns, ["AC_Impedance(Ohm)", "ac_impedance"])
+
+    cycle_vals = _coerce_numeric(data[cycle_col]) if cycle_col is not None else None
+    step_vals = _coerce_numeric(data[step_col]) if step_col is not None else None
+    cycle_max = float(np.nanmax(cycle_vals.to_numpy(dtype=float))) if cycle_vals is not None and cycle_vals.notna().any() else float("nan")
+    step_max = float(np.nanmax(step_vals.to_numpy(dtype=float))) if step_vals is not None and step_vals.notna().any() else float("nan")
+
+    ir_count, ir_median, ir_q95 = _series_quantile_stats(data[ir_col]) if ir_col is not None else (0, float("nan"), float("nan"))
+    ac_count, ac_median, ac_q95 = _series_quantile_stats(data[ac_col]) if ac_col is not None else (0, float("nan"), float("nan"))
 
     return {
         "dt_s": dt_s,
+        "source_dt_median_s": dt_s,
+        "source_dt_q95_s": dt_q95_s,
         "n_rows_sampled": int(len(data)),
         "time_end_s": float(time_s[-1]),
         "initial_soc": initial_soc,
@@ -761,6 +876,17 @@ def derive_data_profile(
         "initial_voltage_v": initial_voltage,
         "current_abs_q95_a": i_abs_q95,
         "current_abs_q99_a": i_abs_q99,
+        "source_current_abs_q95_a": i_abs_q95,
+        "source_temp_missing_frac": float(np.clip(source_temp_missing_frac, 0.0, 1.0)),
+        "source_temp_present": float(source_temp_present),
+        "source_cycle_index_max": cycle_max,
+        "source_step_index_max": step_max,
+        "source_internal_resistance_present": 1.0 if ir_count > 0 else 0.0,
+        "source_internal_resistance_median_ohm": ir_median,
+        "source_internal_resistance_q95_ohm": ir_q95,
+        "source_ac_impedance_present": 1.0 if ac_count > 0 else 0.0,
+        "source_ac_impedance_median_ohm": ac_median,
+        "source_ac_impedance_q95_ohm": ac_q95,
     }
 
 
@@ -867,6 +993,7 @@ def collect_data_calibrated_scenarios(run_config: BenchmarkConfig) -> List[Dict[
     standardized_root = Path(run_config.standardized_root)
     params_root = Path(run_config.params_root)
     families = _split_csv_arg(run_config.dataset_families)
+    excluded_cases = _parse_case_filter_arg(getattr(run_config, "exclude_dataset_cases", ""))
     scenarios: List[Dict[str, Any]] = []
 
     for family in families:
@@ -910,6 +1037,13 @@ def collect_data_calibrated_scenarios(run_config: BenchmarkConfig) -> List[Dict[
                         }
                     )
 
+        if excluded_cases:
+            family_entries = [
+                item
+                for item in family_entries
+                if (str(item["family"]).lower(), str(item["csv_path"].stem).lower()) not in excluded_cases
+            ]
+
         family_entries.sort(key=lambda item: item.get("n_rows", 0), reverse=True)
         selected = family_entries[: max(1, run_config.max_files_per_dataset)]
         for entry in selected:
@@ -919,6 +1053,18 @@ def collect_data_calibrated_scenarios(run_config: BenchmarkConfig) -> List[Dict[
                     default_initial_soc=run_config.initial_soc,
                     default_ambient_temp_c=run_config.ambient_temp_c,
                 )
+                if str(family).strip().lower() == "nasa":
+                    nasa_imp_root = Path(getattr(run_config, "nasa_impedance_root", "data/standardized/nasa_impedance"))
+                    nasa_imp_path = nasa_imp_root / f"{entry['csv_path'].stem}_impedance.csv"
+                    profile.update(_derive_nasa_impedance_profile(nasa_imp_path))
+                else:
+                    profile.update(
+                        {
+                            "source_nasa_impedance_present": 0.0,
+                            "source_nasa_rectified_impedance_median_ohm": float("nan"),
+                            "source_nasa_rectified_impedance_q95_ohm": float("nan"),
+                        }
+                    )
             except Exception:
                 continue
 

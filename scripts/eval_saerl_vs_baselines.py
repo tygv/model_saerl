@@ -44,10 +44,12 @@ from scripts.run_baseline_benchmarks import (
 )
 from scripts.saerl_common import (
     build_setting_for_objective,
+    chemistry_aware_mpc_config as chemistry_aware_mpc_config_common,
     compute_extended_metrics,
     initial_state_from_env,
     load_data_calibrated_scenarios,
     make_env,
+    scenario_context_array,
 )
 
 
@@ -74,10 +76,12 @@ class EvalConfig:
     standardized_root: str = "data/standardized"
     params_root: str = "data/standardized_params"
     dataset_families: str = "nasa,calce,matr"
+    exclude_dataset_cases: str = ""
     max_files_per_dataset: int = 3
     random_seed: int = 123
     chemistry_mode: str = "global"
     primary_saerl_mode: str = "shared_plus_heads"
+    saerl_mpc_anchor_mode: str = "family_specific"
     chemistry_families: str = ""
     chemistry_aware_baselines: bool = False
     saerl_eval_calibration_json: str = ""
@@ -87,6 +91,9 @@ class EvalConfig:
     feasible_time_slack: float = 1.35
     max_steps_cap: int = 5000
     strict_chemistry_assets: bool = True
+    context_feature_set: str = "none"
+    family_metadata_json: str = "configs/source_family_metadata_v1.json"
+    nasa_impedance_root: str = "data/standardized/nasa_impedance"
 
 
 def parse_args() -> EvalConfig:
@@ -124,6 +131,12 @@ def parse_args() -> EvalConfig:
     parser.add_argument("--standardized-root", type=str, default="data/standardized")
     parser.add_argument("--params-root", type=str, default="data/standardized_params")
     parser.add_argument("--dataset-families", type=str, default="nasa,calce,matr")
+    parser.add_argument(
+        "--exclude-dataset-cases",
+        type=str,
+        default="",
+        help="Optional comma list of family/case_id pairs to skip during scenario selection.",
+    )
     parser.add_argument("--max-files-per-dataset", type=int, default=3)
     parser.add_argument("--random-seed", type=int, default=123)
     parser.add_argument(
@@ -139,6 +152,13 @@ def parse_args() -> EvalConfig:
         default="shared_plus_heads",
         choices=["global", "family_specific", "shared_plus_heads"],
         help="Primary SAERL variant used for acceptance checks and legacy 'saerl' alias.",
+    )
+    parser.add_argument(
+        "--saerl-mpc-anchor-mode",
+        type=str,
+        default="family_specific",
+        choices=["global", "family_specific", "shared_plus_heads"],
+        help="Chemistry-aware MPC anchor mode used by SAERL residual inference.",
     )
     parser.add_argument(
         "--chemistry-families",
@@ -167,6 +187,25 @@ def parse_args() -> EvalConfig:
             "Skip per-controller/per-scenario figure generation during evaluation "
             "(recommended for faster full sweeps)."
         ),
+    )
+    parser.add_argument(
+        "--context-feature-set",
+        type=str,
+        default="none",
+        choices=["none", "source_v1"],
+        help="Optional static context feature set used for SAERL inference.",
+    )
+    parser.add_argument(
+        "--family-metadata-json",
+        type=str,
+        default="configs/source_family_metadata_v1.json",
+        help="Family metadata JSON used to build source_v1 scenario context.",
+    )
+    parser.add_argument(
+        "--nasa-impedance-root",
+        type=str,
+        default="data/standardized/nasa_impedance",
+        help="Optional NASA impedance sidecar root used by source_v1 context.",
     )
     parser.add_argument(
         "--disable-adaptive-horizon",
@@ -229,10 +268,12 @@ def parse_args() -> EvalConfig:
         standardized_root=args.standardized_root,
         params_root=args.params_root,
         dataset_families=args.dataset_families,
+        exclude_dataset_cases=args.exclude_dataset_cases,
         max_files_per_dataset=args.max_files_per_dataset,
         random_seed=args.random_seed,
         chemistry_mode=args.chemistry_mode,
         primary_saerl_mode=args.primary_saerl_mode,
+        saerl_mpc_anchor_mode=args.saerl_mpc_anchor_mode,
         chemistry_families=args.chemistry_families,
         chemistry_aware_baselines=bool(args.chemistry_aware_baselines),
         saerl_eval_calibration_json=args.saerl_eval_calibration_json,
@@ -242,6 +283,9 @@ def parse_args() -> EvalConfig:
         feasible_time_slack=float(args.feasible_time_slack),
         max_steps_cap=int(args.max_steps_cap),
         strict_chemistry_assets=not bool(args.allow_chemistry_fallback),
+        context_feature_set=args.context_feature_set,
+        family_metadata_json=args.family_metadata_json,
+        nasa_impedance_root=args.nasa_impedance_root,
     )
 
 
@@ -672,6 +716,8 @@ def run_rollout(
     initial_temp_c: float,
     target_soc: float,
     cv_voltage_v: float,
+    saerl_mpc_config: Optional[MPCConfig] = None,
+    saerl_context: Optional[Any] = None,
 ) -> pd.DataFrame:
     env.reset(initial_soc=initial_soc, temperature=initial_temp_c)
     trim_pack_histories(env.pack)
@@ -683,7 +729,7 @@ def run_rollout(
 
     # Base MPC is needed for SAERL residual action.
     mpc_for_saerl = RolloutMPCController(
-        config=MPCConfig(),
+        config=MPCConfig() if saerl_mpc_config is None else saerl_mpc_config,
         cv_voltage_v=cv_voltage_v,
         max_charge_current_a=env.max_charge_current_a,
         target_soc=target_soc,
@@ -699,6 +745,7 @@ def run_rollout(
                 env=env,
                 mpc_action=float(mpc_action),
                 cv_voltage_v=cv_voltage_v,
+                context=saerl_context,
             )
             inference_ms = (time.perf_counter() - t0) * 1000.0
             info["mpc_action"] = float(mpc_action)
@@ -891,6 +938,8 @@ def main() -> None:
         },
         low_memory=False,
     )
+    if any(str(col).startswith("ctx_") for col in df.columns.tolist()) and config.context_feature_set == "none":
+        config.context_feature_set = "source_v1"
     with Path(config.split_manifest_json).open("r", encoding="utf-8") as handle:
         manifest = json.load(handle)
     folds = manifest.get("folds", [])
@@ -907,6 +956,7 @@ def main() -> None:
         standardized_root=config.standardized_root,
         params_root=config.params_root,
         dataset_families=config.dataset_families,
+        exclude_dataset_cases=config.exclude_dataset_cases,
         max_files_per_dataset=config.max_files_per_dataset,
         n_series=config.n_series,
         n_parallel=config.n_parallel,
@@ -915,6 +965,9 @@ def main() -> None:
         initial_soc=config.initial_soc,
         target_soc=config.target_soc,
         ambient_temp_c=config.ambient_temp_c,
+        context_feature_set=config.context_feature_set,
+        family_metadata_json=config.family_metadata_json,
+        nasa_impedance_root=config.nasa_impedance_root,
     )
     scenario_map = {(str(s["family"]), str(s["case_id"])): s for s in scenarios}
 
@@ -973,6 +1026,9 @@ def main() -> None:
                 objective=objectives[objective_key],
                 scenario=scenario_map[(family, case)],
             )
+            scenario_context_dict = scenario_map[(family, case)].get("source_context", {})
+            if not isinstance(scenario_context_dict, dict):
+                scenario_context_dict = {}
             effective_max_steps = int(config.max_steps)
             if config.adaptive_horizon:
                 effective_max_steps, horizon_info = recommend_episode_max_steps(
@@ -1176,6 +1232,20 @@ def main() -> None:
                         max_steps=effective_max_steps,
                         target_soc=config.target_soc,
                     )
+                    saerl_mpc_cfg = None
+                    saerl_context = None
+                    if str(name).lower().startswith("saerl"):
+                        saerl_mpc_cfg = chemistry_aware_mpc_config_common(
+                            family=family_l,
+                            mode=config.saerl_mpc_anchor_mode,
+                            objective_key=objective_key,
+                        )
+                        if hasattr(ctrl, "predictor"):
+                            saerl_context = scenario_context_array(
+                                setting.scenario,
+                                context_feature_set=ctrl.predictor.config.context_feature_set,
+                                context_columns=ctrl.predictor.config.context_columns,
+                            )
                     results = run_rollout(
                         env=env,
                         controller_name=name,
@@ -1184,6 +1254,8 @@ def main() -> None:
                         initial_temp_c=setting.initial_temp_c,
                         target_soc=config.target_soc,
                         cv_voltage_v=setting.cv_voltage_v,
+                        saerl_mpc_config=saerl_mpc_cfg,
+                        saerl_context=saerl_context,
                     )
                     metrics = compute_extended_metrics(
                         results=results,
@@ -1216,11 +1288,15 @@ def main() -> None:
                         ),
                         "controller_chemistry_family": family_l,
                         "controller_eval_calibration": eval_calibration if str(name).startswith("saerl") else {},
+                        "controller_mpc_anchor_mode": (
+                            config.saerl_mpc_anchor_mode if str(name).startswith("saerl") else ""
+                        ),
                         "metrics": metrics,
                         "cv_voltage_v": setting.cv_voltage_v,
                         "max_charge_current_a": setting.max_charge_current_a,
                         "effective_max_steps": int(effective_max_steps),
                         "horizon_info": horizon_info,
+                        **{k: float(v) for k, v in scenario_context_dict.items() if str(k).startswith("ctx_")},
                     },
                 )
                 if not config.skip_detailed_figures:
@@ -1261,6 +1337,7 @@ def main() -> None:
                     "dataset_case": case,
                     "eval_config": asdict(config),
                     "saerl_eval_calibration": eval_calibration,
+                    "saerl_mpc_anchor_mode": config.saerl_mpc_anchor_mode,
                     "cv_voltage_v": setting.cv_voltage_v,
                     "max_charge_current_a": setting.max_charge_current_a,
                     "effective_max_steps": int(effective_max_steps),
@@ -1330,6 +1407,7 @@ def main() -> None:
                 "mpc_safety_event_count": float(all_metrics["mpc"].get("safety_event_count", np.nan)),
                 "saerl_safety_event_count": float(all_metrics["saerl"].get("safety_event_count", np.nan)),
                 "saerl_inference_latency_mean_ms": float(all_metrics["saerl"].get("inference_latency_mean_ms", np.nan)),
+                **{k: float(v) for k, v in scenario_context_dict.items() if str(k).startswith("ctx_")},
             }
             acceptance_rows.append(acceptance_row)
             print(

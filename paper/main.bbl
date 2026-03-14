@@ -1,8 +1,232 @@
-\begin{thebibliography}{0}
+\begin{thebibliography}{32}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Hu et~al.(2020)Hu, Zhang, Liu, Lin, Dey, and Onori]{hu2020}
+Xiaosong Hu, Kai Zhang, Kai Liu, Xuebing Lin, Suryanarayana Dey, and Simona
+  Onori.
+\newblock Advanced fault diagnosis for lithium ion battery systems a review of
+  fault mechanisms, fault features, and diagnosis procedures.
+\newblock \emph{IEEE Industrial Electronics Magazine}, 14\penalty0
+  (3):\penalty0 65--91, 2020.
+
+\bibitem[Tomaszewska et~al.(2019{\natexlab{a}})Tomaszewska, Chu, Feng, O'Kane,
+  Liu, Chen, et~al.]{tomaszewska2019}
+Anna Tomaszewska, Zhengrui Chu, Xiaosong Feng, Simon O'Kane, Xiongwen Liu,
+  Ji~Chen, et~al.
+\newblock Lithium ion battery fast charging a review.
+\newblock \emph{eTransportation}, 1:\penalty0 100011, 2019{\natexlab{a}}.
+
+\bibitem[Tanim et~al.(2018)]{tanim2018}
+T.~R. Tanim et~al.
+\newblock Fast charging of lithium ion batteries and its implications.
+\newblock Technical Report NREL TP 5400 72825, National Renewable Energy
+  Laboratory, 2018.
+
+\bibitem[Xin et~al.(2024)]{xin2024machines}
+Kun Xin et~al.
+\newblock The impact of internal resistance variations on the current imbalance
+  in lithium ion battery packs with parallel configuration.
+\newblock \emph{Machines}, 15\penalty0 (9):\penalty0 423, 2024.
+\newblock \doi{10.3390/machines15090423}.
+
+\bibitem[Liu et~al.(2018{\natexlab{a}})Liu, Zou, Li, and Wik]{liu2018}
+Kai Liu, Chenbin Zou, Ke~Li, and Torbjorn Wik.
+\newblock Charging pattern optimization for lithium ion batteries with an
+  electrothermal aging model.
+\newblock \emph{IEEE Transactions on Industrial Informatics}, 14\penalty0
+  (12):\penalty0 5463--5474, 2018{\natexlab{a}}.
+
+\bibitem[Wang et~al.(2023)]{wang2023saclagrange}
+Zhe Wang et~al.
+\newblock Safety enhanced fast charging for electric vehicles via soft actor
+  critic lagrange.
+\newblock \emph{Applied Energy}, 2023.
+\newblock \doi{10.1016/j.apenergy.2022.120272}.
+
+\bibitem[Saha and Goebel(2008{\natexlab{a}})]{saha2008}
+Bhaskar Saha and Kai Goebel.
+\newblock Battery data set.
+\newblock In \emph{Prognostics and Health Management Data Repository},
+  2008{\natexlab{a}}.
+\newblock NASA Ames Research Center.
+
+\bibitem[Severson et~al.(2019{\natexlab{a}})Severson, Attia, Jin, Perkins,
+  Jiang, Yang, et~al.]{severson2019}
+Kristen~A. Severson, Peter~M. Attia, Ning Jin, Neil Perkins, Bo~Jiang, Zi~Yang,
+  et~al.
+\newblock Data driven prediction of battery cycle life before capacity
+  degradation.
+\newblock \emph{Nature Energy}, 4:\penalty0 383--391, 2019{\natexlab{a}}.
+
+\bibitem[Tomaszewska et~al.(2019{\natexlab{b}})]{tomaszewska2019lithium}
+A.~Tomaszewska et~al.
+\newblock Lithium-ion battery fast charging: a review.
+\newblock \emph{eTransportation}, 1:\penalty0 100011, 2019{\natexlab{b}}.
+
+\bibitem[Waldmann et~al.(2014)Waldmann, Wilka, Kasper, Fleischhammer, and
+  Wohlfahrt-Mehrens]{waldmann2014optimization}
+T.~Waldmann, M.~Wilka, M.~Kasper, M.~Fleischhammer, and M.~Wohlfahrt-Mehrens.
+\newblock Temperature dependent ageing mechanisms in lithium-ion batteries - a
+  post-mortem study.
+\newblock \emph{Journal of Power Sources}, 262:\penalty0 129--135, 2014.
+
+\bibitem[Liu et~al.(2018{\natexlab{b}})Liu, Zou, Li, and Wik]{liu2018charging}
+K.~Liu, C.~Zou, K.~Li, and T.~Wik.
+\newblock Charging pattern optimization for lithium-ion batteries with an
+  electrothermal-aging model.
+\newblock \emph{IEEE Transactions on Industrial Informatics}, 14\penalty0
+  (12):\penalty0 5463--5474, 2018{\natexlab{b}}.
+
+\bibitem[Beh et~al.(2019)Beh, Abidin, and Forsyth]{beh2019pulse}
+H.~Z. Beh, I.~Z. Abidin, and A.~J. Forsyth.
+\newblock Pulse charging of lithium-ion batteries: a review.
+\newblock \emph{IET Electrical Systems in Transportation}, 9\penalty0
+  (3):\penalty0 101--109, 2019.
+
+\bibitem[Krewer et~al.(2018)Krewer, R{\"o}der, Harinath, Braatz, Bed{\"u}rftig,
+  and Findeisen]{krewer2018review}
+Ulrike Krewer, Florian R{\"o}der, Eeshwar Harinath, Richard~D. Braatz, Benjamin
+  Bed{\"u}rftig, and Rolf Findeisen.
+\newblock Review dynamic models of li ion batteries for diagnosis and operation
+  a review and perspective.
+\newblock \emph{Journal of The Electrochemical Society}, 165\penalty0
+  (16):\penalty0 A3656, 2018.
+
+\bibitem[Pinter et~al.(2025)Pinter, Rohde, and
+  Marinelli]{pinter2025reconfigurable}
+Z.~M. Pinter, G.~Rohde, and M.~Marinelli.
+\newblock Comparative analysis of rule based and model predictive control
+  algorithms in reconfigurable battery systems.
+\newblock \emph{Journal of Energy Storage}, 116:\penalty0 116008, 2025.
+\newblock \doi{10.1016/j.est.2025.116008}.
+
+\bibitem[Liu et~al.(2019{\natexlab{a}})Liu, Li, Peng, and Zhang]{liu2019brief}
+K.~Liu, K.~Li, Q.~Peng, and C.~Zhang.
+\newblock A brief review on key technologies in the battery management system
+  of electric vehicles.
+\newblock \emph{Frontiers of Mechanical Engineering}, 14\penalty0 (1):\penalty0
+  47--64, 2019{\natexlab{a}}.
+
+\bibitem[Wu et~al.(2020)Wu, Wei, Liu, Quan, and Li]{wu2020battery}
+J.~Wu, Z.~Wei, K.~Liu, Z.~Quan, and Y.~Li.
+\newblock Battery-involved energy management for hybrid electric bus based on
+  expert-assistance deep deterministic policy gradient algorithm.
+\newblock \emph{IEEE Transactions on Vehicular Technology}, 69\penalty0
+  (11):\penalty0 12786--12796, 2020.
+
+\bibitem[Schulman et~al.(2017)Schulman, Wolski, Dhariwal, Radford, and
+  Klimov]{schulman2017proximal}
+J.~Schulman, F.~Wolski, P.~Dhariwal, A.~Radford, and O.~Klimov.
+\newblock Proximal policy optimization algorithms.
+\newblock arXiv preprint, 2017.
+
+\bibitem[Chua et~al.(2018)Chua, Calandra, McAllister, and Levine]{chua2018deep}
+K.~Chua, R.~Calandra, R.~McAllister, and S.~Levine.
+\newblock Deep reinforcement learning in a handful of trials using
+  probabilistic dynamics models.
+\newblock In \emph{Advances in Neural Information Processing Systems}, pages
+  4754--4765, 2018.
+
+\bibitem[Yadu et~al.(2024)Yadu, Brahmadathan, et~al.]{yadu2024personalized}
+A.~Yadu, A.~Brahmadathan, et~al.
+\newblock On device personalized charging strategy with an aging model for
+  lithium ion batteries using deep reinforcement learning.
+\newblock \emph{IEEE Access}, 2024.
+
+\bibitem[Wei et~al.(2021)Wei, Zhao, Ji, and Tseng]{wei2021safe}
+Z.~Wei, J.~Zhao, D.~Ji, and K.~J. Tseng.
+\newblock Safe reinforcement learning for fast charging of lithium-ion
+  batteries.
+\newblock \emph{IEEE Transactions on Industrial Informatics}, 17\penalty0
+  (6):\penalty0 3912--3922, 2021.
+
+\bibitem[Alshiekh et~al.(2018)Alshiekh, Bloem, Ehlers, K{\"o}nighofer, Niekum,
+  and Topcu]{alshiekh2018shielding}
+Mohammad Alshiekh, Roderick Bloem, R{\"u}diger Ehlers, Bettina K{\"o}nighofer,
+  Scott Niekum, and Ufuk Topcu.
+\newblock Safe reinforcement learning via shielding.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial
+  Intelligence}, 2018.
+
+\bibitem[Johannink et~al.(2019)Johannink, Bahl, Nair, Luo, Kumar, Loskyll,
+  Ojea, Solowjow, and Levine]{johannink2019residual}
+Tobias Johannink, Shikhar Bahl, Ashvin Nair, Jianlan Luo, Avinash Kumar,
+  Matthias Loskyll, Javier Ojea, Eugen Solowjow, and Sergey Levine.
+\newblock Residual reinforcement learning for robot control.
+\newblock In \emph{2019 International Conference on Robotics and Automation},
+  2019.
+
+\bibitem[Kendall and Gal(2017)]{kendall2017uncertainties}
+Alex Kendall and Yarin Gal.
+\newblock What uncertainties do we need in bayesian deep learning for computer
+  vision.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2017.
+
+\bibitem[Lakshminarayanan et~al.(2017)Lakshminarayanan, Pritzel, and
+  Blundell]{lakshminarayanan2017simple}
+B.~Lakshminarayanan, A.~Pritzel, and C.~Blundell.
+\newblock Simple and scalable predictive uncertainty estimation using deep
+  ensembles.
+\newblock In \emph{Advances in Neural Information Processing Systems}, pages
+  6402--6413, 2017.
+
+\bibitem[Liu et~al.(2019{\natexlab{b}})Liu, Li, Hu, Lucu, and
+  Widanage]{liu2019gaussian}
+K.~Liu, Y.~Li, X.~Hu, M.~Lucu, and W.~D. Widanage.
+\newblock Gaussian process regression with automatic relevance determination
+  kernel for calendar aging prediction of lithium-ion batteries.
+\newblock \emph{IEEE Transactions on Industrial Informatics}, 16\penalty0
+  (6):\penalty0 3767--3777, 2019{\natexlab{b}}.
+
+\bibitem[Koenker and Hallock(2001)]{koenker2001quantile}
+R.~Koenker and K.~F. Hallock.
+\newblock Quantile regression.
+\newblock \emph{Journal of Economic Perspectives}, 15\penalty0 (4):\penalty0
+  143--156, 2001.
+
+\bibitem[Gal and Ghahramani(2016)]{gal2016dropout}
+Yarin Gal and Zoubin Ghahramani.
+\newblock Dropout as a bayesian approximation representing model uncertainty in
+  deep learning.
+\newblock In \emph{Proceedings of the 33rd International Conference on Machine
+  Learning}, 2016.
+
+\bibitem[Shazeer et~al.(2017)Shazeer, Mirhoseini, Maziarz, Davis, Le, and
+  Hinton]{shazeer2017outrageously}
+Noam Shazeer, Azalia Mirhoseini, Krzysztof Maziarz, Andy Davis, Quoc Le, and
+  Geoffrey Hinton.
+\newblock Outrageously large neural networks the sparsely gated mixture of
+  experts layer.
+\newblock \emph{arXiv preprint}, 2017.
+
+\bibitem[Saha and Goebel(2008{\natexlab{b}})]{saha2008battery}
+B.~Saha and K.~Goebel.
+\newblock Battery data set.
+\newblock NASA Ames Prognostics Data Repository, 2008{\natexlab{b}}.
+
+\bibitem[Xing et~al.(2014)Xing, Ma, Tsui, and Pecht]{xing2014battery}
+Y.~Xing, E.~W. Ma, K.~L. Tsui, and M.~Pecht.
+\newblock A novel method for lithium-ion battery remaining useful life
+  prediction using time window and bayesian monte carlo.
+\newblock \emph{Microelectronics Reliability}, 54\penalty0 (9--10):\penalty0
+  2201--2218, 2014.
+
+\bibitem[Severson et~al.(2019{\natexlab{b}})]{severson2019data}
+K.~A. Severson et~al.
+\newblock Data-driven prediction of battery cycle life before capacity
+  degradation.
+\newblock \emph{Nature Energy}, 4\penalty0 (5):\penalty0 383--391,
+  2019{\natexlab{b}}.
+
+\bibitem[Yan et~al.(2020)Yan, Jiang, Zhang, Fan, and Zou]{yan2020mpc}
+G.~Yan, J.~Jiang, W.~Zhang, X.~Fan, and Y.~Zou.
+\newblock Model predictive control-based fast charging strategy for lithium-ion
+  batteries.
+\newblock \emph{IEEE Transactions on Industrial Electronics}, 67\penalty0
+  (9):\penalty0 7454--7464, 2020.
 
 \end{thebibliography}
