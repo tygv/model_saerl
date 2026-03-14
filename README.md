@@ -1,133 +1,132 @@
-# modelBased_rl
+# SAERL for Safe Fast Charging of Lithium-Ion Battery Packs
 
-## Baseline Benchmarking (CCCV vs MPC)
+This repository implements Safe Adaptive Ensemble Reinforcement Learning (SAERL), a hybrid battery-charging framework that combines physics-based modeling, uncertainty-aware ensemble prediction, residual reinforcement learning, and hard safety shielding for pack-level lithium-ion fast charging. The codebase includes the battery and pack simulators, data-calibrated baselines, SAERL dataset generation and training pipelines, evaluation and aggregation scripts, and the paper assets used to report benchmark results.
 
-Run the two classical charging baselines on the same pack environment:
+## Latest Benchmark Snapshot
 
-```bash
-python scripts/run_baseline_benchmarks.py --objective safe --target-soc 0.8 --max-steps 1200
-```
+The latest full benchmark uses 27 scenarios spanning three public dataset families (`NASA`, `CALCE`, `MATR`) and three charging objectives (`fastest`, `safe`, `long_life`).
 
-Supported objective presets come from `pack_experiments.py`:
-- `fastest`
-- `safe`
-- `long_life`
+| Metric | Latest result |
+| --- | --- |
+| Overall acceptance | `7/27` (`25.9%`) |
+| Safety criterion pass rate | `100%` |
+| Temperature criterion pass rate | `100%` |
+| Q-loss criterion pass rate | `88.9%` |
+| Performance criterion pass rate | `37.0%` |
+| Mean SAERL time to 80% SoC | `73.3 min` |
+| Mean SAERL inference latency | `28.7 ms` |
+| Best family | `MATR` (`4/9`) |
+| Weakest family | `NASA` (`0/9`) |
 
-Run all presets in one pass:
+![Overall benchmark pass/fail](paper/figures/results_section/fig2_overall_pass_fail_counts.png)
 
-```bash
-python scripts/run_baseline_benchmarks.py --objective all --target-soc 0.8 --max-steps 1200
-```
+![Controller Pareto front](paper/figures/results_section/fig_controller_pareto_time_vs_safety.png)
 
-Outputs are automatically separated into folders:
-- `results/baselines/cccv`
-- `results/baselines/mpc`
-- `results/baselines/comparison`
+![Representative MATR fast-charge case study](paper/figures/results_section/fig9_case_study_matr_fastest_trajectories.png)
 
-Each folder includes:
-- `trajectory.csv` (step-by-step simulation data)
-- `metrics.json` or `metrics_summary.csv` (benchmark KPIs)
-- high-resolution paper-style figures in both `.png` and `.pdf`
+## What Is In This Repository
 
-### Data-Calibrated Baselines (uses your real NASA/CALCE/MATR recordings)
+- `physics_model.py`: electro-thermal-aging cell model used by the simulators and controllers.
+- `battery_pack_model.py`: pack-level composition with cell variation, balancing, and thermal interaction.
+- `hambrl_pack_env.py`: Gym-like pack charging environment.
+- `parameter_identification.py`: parameter fitting and calibration utilities for standardized datasets.
+- `controllers/adaptive_ensemble_rl.py`: SAERL ensemble experts, gate, residual actor, and inference logic.
+- `controllers/residual_hambrl.py`: earlier residual H-AMBRL controller components.
+- `scripts/generate_saerl_dataset.py`: mixed-behavior SAERL dataset generation.
+- `scripts/train_saerl_ensemble.py`: ensemble expert and gate training.
+- `scripts/train_saerl_policy.py`: residual actor offline and online training.
+- `scripts/eval_saerl_vs_baselines.py`: held-out benchmark evaluation.
+- `scripts/aggregate_saerl_results.py`: aggregate summaries and diagnostics.
+- `scripts/run_saerl_phase3h_source_context_v1.py`: end-to-end source-aware benchmark runner.
+- `paper/`: manuscript, figure assets, and figure-generation utilities.
 
-Run CCCV vs MPC with environment settings calibrated from standardized CSVs and fitted parameter JSONs:
+## Data
 
-```bash
-python scripts/run_baseline_benchmarks.py --use-real-data --dataset-families nasa,calce,matr --max-files-per-dataset 1 --objective safe --max-steps 1200
-```
+Raw datasets are not committed to the repository. Only the source reference file is tracked:
 
-By default this mode treats those files as **cell-level behavior references** and scales them to your configured pack topology (`--n-series`, `--n-parallel`) so output figures are pack-focused.
+- [data/DATASET_SOURCES.md](data/DATASET_SOURCES.md)
 
-When `--use-real-data` is enabled, outputs are written under:
+The benchmark pipeline assumes you have local copies of the standardized and calibrated dataset files needed by the scripts under `data/`.
 
-- `results/baselines/data_calibrated/<objective>/<dataset_family>/<case>/cccv`
-- `results/baselines/data_calibrated/<objective>/<dataset_family>/<case>/mpc`
-- `results/baselines/data_calibrated/<objective>/<dataset_family>/<case>/comparison`
+## Main Workflows
 
-### Aggregated Comparison Across All Objectives + Datasets
-
-After generating data-calibrated baselines, build one aggregated analysis package:
-
-```bash
-python scripts/aggregate_baseline_results.py --input-root results/baselines/data_calibrated --output-root results/baselines/aggregate
-```
-
-This writes:
-- `results/baselines/aggregate/all_runs_long_metrics.csv`
-- `results/baselines/aggregate/scenario_pairwise_deltas.csv`
-- `results/baselines/aggregate/group_means.csv`
-- `results/baselines/aggregate/group_stds.csv`
-- `results/baselines/aggregate/pairwise_delta_means.csv`
-- `results/baselines/aggregate/win_rates.csv`
-- figures (`.png` + `.pdf`) under `results/baselines/aggregate/figures`
-
-## Phase 1: Residual H-AMBRL Pipeline
-
-1) Generate MPC-guided residual training data:
+### 1. Run data-calibrated baselines
 
 ```bash
-python scripts/generate_mpc_dataset.py --objective all --condition all --episodes-per-setting 2 --max-steps 1200
+python scripts/run_baseline_benchmarks.py --use-real-data --dataset-families nasa,calce,matr --max-files-per-dataset 1 --objective all --max-steps 1200
 ```
 
-2) Train residual policy:
+### 2. Run the full source-aware SAERL benchmark
+
+This is the main end-to-end runner for the current benchmark branch:
 
 ```bash
-python scripts/train_residual_policy.py --dataset-csv data/training/residual_mpc_dataset.csv --model-out models/residual_hambrl_policy.json
+python scripts/run_saerl_phase3h_source_context_v1.py
 ```
 
-3) Evaluate all controllers (CCCV vs MPC vs Residual):
+It generates:
+
+- source-aware SAERL datasets
+- ensemble checkpoints
+- residual policy checkpoints
+- held-out evaluation outputs
+- aggregate benchmark summaries
+
+### 3. Run the source-aware pipeline step by step
+
+Generate the dataset:
 
 ```bash
-python scripts/eval_all_controllers.py --model-path models/residual_hambrl_policy.json --objective all --condition all --max-steps 1200
+python scripts/generate_saerl_dataset.py --objective all --dataset-families nasa,calce,matr --context-feature-set source_v1 --family-metadata-json configs/source_family_metadata_v1.json
 ```
 
-Evaluation outputs are grouped by objective/condition under:
-- `results/residual_phase1/evaluation/<objective>/<condition>/cccv`
-- `results/residual_phase1/evaluation/<objective>/<condition>/mpc`
-- `results/residual_phase1/evaluation/<objective>/<condition>/residual`
-- `results/residual_phase1/evaluation/<objective>/<condition>/comparison`
-
-## Phase 2: SAERL (Safe Adaptive Ensemble RL)
-
-1) Generate mixed-behavior dataset with CEM action targets and fold splits:
+Train the ensemble:
 
 ```bash
-python scripts/generate_saerl_dataset.py --objective all --max-files-per-dataset 3 --episodes-per-setting 2
+python scripts/train_saerl_ensemble.py --dataset-csv data/training/saerl_phase3h_source_context_v1_dataset.csv --split-manifest-json data/training/saerl_phase3h_source_context_v1_splits.json --context-feature-set source_v1
 ```
 
-2) Train ensemble experts + adaptive gate:
+Train the policy:
 
 ```bash
-python scripts/train_saerl_ensemble.py --dataset-csv data/training/saerl_phase2_dataset.csv --split-manifest-json data/training/saerl_phase2_splits.json
+python scripts/train_saerl_policy.py --dataset-csv data/training/saerl_phase3h_source_context_v1_dataset.csv --split-manifest-json data/training/saerl_phase3h_source_context_v1_splits.json --context-feature-set source_v1 --saerl-mpc-anchor-mode family_specific
 ```
 
-3) Train SAERL residual actor (offline warm-start + safe online fine-tune):
+Evaluate:
 
 ```bash
-python scripts/train_saerl_policy.py --dataset-csv data/training/saerl_phase2_dataset.csv --split-manifest-json data/training/saerl_phase2_splits.json
+python scripts/eval_saerl_vs_baselines.py --dataset-csv data/training/saerl_phase3h_source_context_v1_dataset.csv --split-manifest-json data/training/saerl_phase3h_source_context_v1_splits.json --context-feature-set source_v1
 ```
 
-4) Evaluate CCCV vs MPC vs SAERL on held-out fold cases:
+Aggregate:
 
 ```bash
-python scripts/eval_saerl_vs_baselines.py --dataset-csv data/training/saerl_phase2_dataset.csv --split-manifest-json data/training/saerl_phase2_splits.json --run-ablations
+python scripts/aggregate_saerl_results.py --input-root results/saerl_phase3h_source_context_v1/evaluation_allfolds_3family --output-root results/saerl_phase3h_source_context_v1/aggregate_allfolds_3family
 ```
 
-For cross-chemistry fairness (different `dt` and current scales), use adaptive horizon scaling:
+## Paper and Figures
+
+The manuscript lives in:
+
+- [paper/main.tex](paper/main.tex)
+
+Regenerate the results-section figures with:
 
 ```bash
-python scripts/eval_saerl_vs_baselines.py --dataset-csv data/training/saerl_phase3d_dataset.csv --split-manifest-json data/training/saerl_phase3d_splits.json --chemistry-mode family_specific --primary-saerl-mode family_specific --min-episode-minutes 120 --feasible-time-slack 1.35 --max-steps-cap 5000 --skip-detailed-figures
+python scripts/generate_results_section_figures.py
 ```
 
-5) Aggregate SAERL phase-2 outputs:
+Generated figures are written to:
 
-```bash
-python scripts/aggregate_saerl_results.py --input-root results/saerl_phase2/evaluation --output-root results/saerl_phase2/aggregate
-```
+- `paper/figures/results_section`
 
-6) Run SAERL checks (unit + integration + runtime):
+Useful analysis documents in the repository:
 
-```bash
-python scripts/run_saerl_tests.py
-```
+- [SOURCE_CONTEXT_V1_LATEST_RUN_ANALYSIS.md](SOURCE_CONTEXT_V1_LATEST_RUN_ANALYSIS.md)
+- [CODEBASE_TECHNICAL_REVIEW.md](CODEBASE_TECHNICAL_REVIEW.md)
+- [METHODOLOGY.md](METHODOLOGY.md)
+
+## Repository Notes
+
+- Local raw datasets, experiment outputs, and ebook PDFs are intentionally ignored by `.gitignore`.
+- For paper assets, the repository keeps the manuscript sources and `paper/figures/results_section`, while other local paper build artifacts are treated as generated files.
