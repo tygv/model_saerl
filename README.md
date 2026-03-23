@@ -125,8 +125,3 @@ Useful analysis documents in the repository:
 - [SOURCE_CONTEXT_V1_LATEST_RUN_ANALYSIS.md](SOURCE_CONTEXT_V1_LATEST_RUN_ANALYSIS.md)
 - [CODEBASE_TECHNICAL_REVIEW.md](CODEBASE_TECHNICAL_REVIEW.md)
 - [METHODOLOGY.md](METHODOLOGY.md)
-
-## Repository Notes
-
-- Local raw datasets, experiment outputs, and ebook PDFs are intentionally ignored by `.gitignore`.
-- For paper assets, the repository keeps the manuscript sources and `paper/figures/results_section`, while other local paper build artifacts are treated as generated files.
